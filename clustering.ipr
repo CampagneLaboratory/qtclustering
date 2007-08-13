@@ -35,7 +35,9 @@
     <option name="USER" value="" />
   </component>
   <component name="CheckStyle-IDEA">
-    <checkstyle-config />
+    <checkstyle-config>
+      <property name="config-file">$PROJECT_DIR$\config\checkstyle\clustering_checks.xml</property>
+    </checkstyle-config>
   </component>
   <component name="CodeStyleProjectProfileManger">
     <option name="PROJECT_PROFILE" />
@@ -465,7 +467,7 @@
     <option name="SHOW_FILE_HISTORY_AS_TREE" value="true" />
   </component>
   <component name="VcsDirectoryMappings">
-    <mapping directory="" vcs="" />
+    <mapping directory="" vcs="svn" />
   </component>
   <component name="com.intellij.ide.util.scopeChooser.ScopeChooserConfigurable" proportions="" version="1">
     <option name="myLastEditedConfigurable" />

@@ -25,8 +25,9 @@ public interface SimilarityDistanceCalculator {
     double distance(int[] cluster, int clusterSize, int instanceIndex);
 
     /**
-     * When some distances between instance pairs are missing/unknown the ignoreDistance is returned.
-     * The clustering algorithm uses ignoreDistance to recognize cases when the distance is unknown.
+     * When some distances between instance pairs are missing/unknown the
+     * ignoreDistance is returned. The clustering algorithm uses ignoreDistance
+     * to recognize cases when the distance is unknown.
      *
      * @return The distance value that the linkage method will ignore.
      */

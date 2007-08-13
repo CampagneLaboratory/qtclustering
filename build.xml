@@ -219,7 +219,6 @@
             <ruleset>imports</ruleset>
             <ruleset>logging-jakarta-commons</ruleset>
             <ruleset>j2ee</ruleset>
-            <ruleset>junit</ruleset>
             <ruleset>migrating</ruleset>
             <ruleset>optimizations</ruleset>
             <ruleset>strictexception</ruleset>
@@ -232,6 +231,7 @@
                         <ruleset>coupling</ruleset>
                         <ruleset>design</ruleset>
                         <ruleset>javabeans</ruleset>
+                        <ruleset>junit</ruleset>
                         <ruleset>naming</ruleset>
             -->
             <formatter type="xml" toFile="${test-results}/pmd-report.xml"/>
