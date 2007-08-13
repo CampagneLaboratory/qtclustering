@@ -1,0 +1,320 @@
+<project name="clustering" default="test" basedir=".">
+    <tstamp>
+        <!-- current time for buildstamp purposes -->
+        <format property="buildstamp" pattern="yyyyMMddHHmmss"/>
+    </tstamp>
+    <tstamp>
+        <format property="year" pattern="yyyy"/>
+    </tstamp>
+
+    <property environment="env" />
+    <property name="classes" location="classes"/>
+    <property name="lib" location="lib"/>
+    <property name="src" location="src"/>
+    <property name="test" location="test-src"/>
+    <property name="javadocs" location="javadocs"/>
+    <property name="logs" location="logs"/>
+    <property name="config" location="config"/>
+    <property name="test-src" location="test-src"/>
+    <property name="test-classes" location="test-classes"/>
+    <property name="cobertura-classes" location="cobertura-classes"/>
+    <property name="test-results" location="test-results"/>
+
+    <property name="debug" value="on"/>
+    <property name="optimize" value="on"/>
+    <property name="deprecation" value="on"/>
+
+    <path id="compile.classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar"/>
+            <exclude name="junit*.jar"/>
+        </fileset>
+    </path>
+
+    <path id="cobertura.classpath">
+        <fileset dir="${lib}/cobertura">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${lib}">
+            <include name="log4j-1.2.14.jar"/>
+        </fileset>
+    </path>
+
+    <path id="test.classpath">
+        <!--
+              Note the classpath order: instrumented classes are before the
+              original (uninstrumented) classes.  This is important.
+          -->
+        <pathelement location="${cobertura-classes}"/>
+        <pathelement location="${classes}"/>
+        <pathelement location="${test-classes}"/>
+        <fileset dir="${lib}">
+            <include name="junit*.jar"/>
+        </fileset>
+        <path refid="compile.classpath"/>
+        <path refid="cobertura.classpath"/>
+    </path>
+
+    <!-- checkstyle source code analyzer task -->
+    <taskdef resource="checkstyletask.properties" onerror="report">
+        <classpath>
+            <pathelement location="${lib}/checkstyle/checkstyle-all-4.3.jar"/>
+        </classpath>
+    </taskdef>
+
+    <!-- See http://pmd.sourceforge.net/ -->
+    <path id="pmd.path">
+        <fileset dir="${lib}/pmd">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask"
+             classpathref="pmd.path"/>
+
+    <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask"
+             classpathref="pmd.path"/>
+
+    <!-- See http://cobertura.sourceforge.net/ -->
+    <taskdef classpathref="cobertura.classpath" resource="tasks.properties"/>
+
+    <!-- =================================================================== -->
+    <!-- Initialization target                                               -->
+    <!-- =================================================================== -->
+    <target name="init">
+        <tstamp/>
+        <mkdir dir="${classes}"/>
+        <mkdir dir="${test-classes}"/>
+        <!--  Create the logs directory -->
+        <mkdir dir="${logs}"/>
+        <!-- Create directory for test results -->
+        <mkdir dir="${test-results}"/>
+        <mkdir dir="${test-results}/html"/>
+    </target>
+
+    <target name="compile" depends="init" description="compiles the source code">
+        <javac srcdir="${src}" destdir="${classes}" debug="${debug}"
+               optimize="${optimize}" source="1.5" deprecation="${deprecation}"
+               target="1.5">
+            <classpath refid="compile.classpath"/>
+        </javac>
+    </target>
+
+    <target name="compile-tests" depends="compile" description="Compile test source code">
+        <javac srcdir="${test-src}" destdir="${test-classes}" debug="${debug}"
+               optimize="${optimize}" source="1.5" deprecation="${deprecation}"
+               target="1.5">
+            <compilerarg value="-Xlint:unchecked"/>
+            <classpath refid="test.classpath"/>
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile" description="Create a jar file for rbdg">
+        <jar jarfile="clustering.jar">
+            <fileset dir="${classes}"/>
+            <manifest>
+                <attribute name="Specification-Title" value="clustering"/>
+                <attribute name="Specification-Vendor"
+                           value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
+                <attribute name="Implementation-Version" value="${buildstamp}"/>
+                <attribute name="Implementation-Vendor"
+                           value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Creates the API documentation                                       -->
+    <!-- =================================================================== -->
+    <target name="javadocs" depends="init" description="generates the API documentation">
+        <mkdir dir="${javadocs}"/>
+        <javadoc packagenames="edu.cornell.med.*" source="1.5"
+                 sourcepath="${src}" destdir="${javadocs}"
+                 author="true" version="true" windowtitle="Clustering API">
+            <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
+            <classpath>
+                <path refid="compile.classpath"/>
+                <pathelement location="${classes}"/>
+            </classpath>
+            <bottom>
+                <![CDATA[<i>Copyright &#169; 2006-${year} Institute for Computational Biomedicine, All Rights Reserved.</i>]]>
+            </bottom>
+        </javadoc>
+    </target>
+
+    <target name="clean" description="Cleans up the directory">
+        <delete dir="${classes}"/>
+        <delete dir="${javadocs}"/>
+
+        <delete dir="${test-classes}"/>
+        <delete dir="${test-results}"/>
+
+        <delete dir="${cobertura-classes}"/>
+        <delete file="cobertura.ser"/>
+
+        <delete file="clustering.jar"/>
+        <delete dir="${logs}"/>
+    </target>
+
+    <target name="cruisecontrol" depends="clean, cobertura-setup, findbugs,
+                  test, jar, javadocs, pmd, cpd, checkstyle, cobertura-report"
+            description="Run CruiseControl Build and Tests"/>
+
+    <target name="test" depends="compile-tests, cobertura-instrument" description="Run JUnit Tests">
+        <junit dir="${basedir}" fork="true" printsummary="yes" haltonfailure="yes" haltonerror="yes" showoutput="yes">
+            <sysproperty key="net.sourceforge.cobertura.datafile"
+                         file="${basedir}/cobertura.ser"/>
+            <classpath refid="test.classpath"/>
+
+            <batchtest haltonfailure="no" haltonerror="no" todir="${test-results}"
+                       failureproperty="test-failure" errorproperty="test-error">
+                <formatter type="plain" usefile="false"/>
+                <formatter type="xml"/>
+                <fileset dir="${test-src}">
+                    <include name="**/Test*.java"/>
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+        <junitreport todir="${logs}">
+            <fileset dir="${test-results}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${test-results}/html/junit"/>
+        </junitreport>
+        <condition property="tests-failed">
+            <or>
+                <isset property="test-error"/>
+                <isset property="test-failure"/>
+            </or>
+        </condition>
+        <fail message="One or more of the tests failed" if="tests-failed"/>
+    </target>
+
+    <target name="checkstyle" depends="init" description="Checks source against coding standards">
+        <checkstyle config="${config}/checkstyle/clustering_checks.xml" failonviolation="no">
+            <fileset dir="${src}"/>
+            <fileset dir="${test-src}"/>
+            <classpath refid="test.classpath"/>
+            <formatter type="xml" toFile="${test-results}/checkstyle_errors.xml"/>
+            <formatter type="plain"/>
+        </checkstyle>
+
+        <xslt in="${test-results}/checkstyle_errors.xml" out="${test-results}/html/checkstyle/index.html"
+              style="${config}/checkstyle/checkstyle.xsl"/>
+    </target>
+
+    <target name="pmd" depends="init" description="Scan Java source code and look for potential problems">
+        <pmd targetjdk="1.5" failonerror="true" failurespropertyname="pmderrors" shortfilenames="true" encoding="utf-8">
+            <fileset dir="${src}">
+                <include name="**/*.java"/>
+            </fileset>
+            <fileset dir="${test-src}">
+                <include name="**/*.java"/>
+            </fileset>
+            <ruleset>basic</ruleset>
+            <ruleset>braces</ruleset>
+            <ruleset>clone</ruleset>
+            <ruleset>finalizers</ruleset>
+            <ruleset>imports</ruleset>
+            <ruleset>logging-jakarta-commons</ruleset>
+            <ruleset>j2ee</ruleset>
+            <ruleset>junit</ruleset>
+            <ruleset>migrating</ruleset>
+            <ruleset>optimizations</ruleset>
+            <ruleset>strictexception</ruleset>
+            <ruleset>strings</ruleset>
+            <ruleset>sunsecure</ruleset>
+            <ruleset>unusedcode</ruleset>
+            <!--
+                        <ruleset>codesize</ruleset>
+                        <ruleset>controversial</ruleset>
+                        <ruleset>coupling</ruleset>
+                        <ruleset>design</ruleset>
+                        <ruleset>javabeans</ruleset>
+                        <ruleset>naming</ruleset>
+            -->
+            <formatter type="xml" toFile="${test-results}/pmd-report.xml"/>
+        </pmd>
+        <xslt in="${test-results}/pmd-report.xml" style="${config}/pmd/pmd-report-per-class.xslt"
+              out="${test-results}/html/pmd/index.html"/>
+    </target>
+
+    <target name="cpd" depends="init" description="Scan Java source code and look for potential duplication">
+        <cpd minimumTokenCount="50" outputFile="${test-results}/cpd-report.xml" format="xml" encoding="utf-8">
+            <fileset dir="${src}">
+                <include name="**/*.java"/>
+            </fileset>
+        </cpd>
+        <xslt in="${test-results}/cpd-report.xml" style="${config}/pmd/cpdhtml.xslt"
+              out="${test-results}/html/cpd/index.html"/>
+    </target>
+
+    <target name="cobertura-setup">
+        <mkdir dir="${cobertura-classes}"/>
+        <property name="with-cobertura" value="true"/>
+    </target>
+
+    <target name="cobertura-instrument" if="with-cobertura">
+        <delete file="cobertura.ser"/>
+
+        <cobertura-instrument todir="${cobertura-classes}">
+            <fileset dir="${classes}">
+                <include name="**/*.class"/>
+            </fileset>
+        </cobertura-instrument>
+    </target>
+
+    <target name="cobertura-report">
+        <cobertura-report format="html" destdir="${test-results}/html/cobertura">
+            <fileset dir="${src}"/>
+        </cobertura-report>
+    </target>
+
+    <!-- See http://findbugs.sourceforge.net/ -->
+    <target name="findbugs" depends="compile-tests" description="Run findbugs on source code">
+        <taskdef name="findbugs"
+                 classname="edu.umd.cs.findbugs.anttask.FindBugsTask">
+            <classpath>
+                <fileset dir="${lib}/findbugs">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </taskdef>
+
+        <findbugs
+                jvmargs="-Xmx999m" output="xml:withMessages"
+                outputfile="${test-results}/findbugs.xml"
+                pluginList="${lib}/findbugs/plugin/coreplugin.jar">
+            <auxClasspath refid="test.classpath"/>
+            <sourcePath path="${src}"/>
+            <sourcePath path="${test-src}"/>
+            <classpath>
+                <fileset dir="${lib}/findbugs">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <class location="${classes}"/>
+            <class location="${test-classes}"/>
+        </findbugs>
+        <xslt in="${test-results}/findbugs.xml" style="${config}/findbugs/findbugs-fancy.xsl"
+              out="${test-results}/html/findbugs/index.html"/>
+    </target>
+
+    <!-- See http://www.clarkware.com/software/JDepend.html -->
+    <target name="jdepend">
+        <jdepend format="xml" outputfile="${test-results}/jdepend-report.xml"
+            classpathref="compile.classpath">
+            <sourcespath>
+                <pathelement location="src"/>
+            </sourcespath>
+            <classespath>
+                <pathelement location="${classes}"/>
+            </classespath>
+        </jdepend>
+
+        <xslt basedir="${test-results}" destdir="${test-results}/html/jdepend"
+              includes="jdepend-report.xml"
+              style="${ant.home}/etc/jdepend.xsl" />
+    </target>
+</project>
