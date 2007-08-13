@@ -1,3 +1,21 @@
+/*
+ * Copyright © 2005-2007 Institute for Computational Biomedicine,
+ *                       Weill Medical College of Cornell University
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package edu.cornell.med.icb.clustering;
 
 import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
@@ -7,17 +25,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implements the QT_Cluster algorithm. (QT stands for Quality Threshold/diameter of the cluster)
- * See   http://en.wikipedia.org/wiki/Data_clustering#Types_of_clustering
+ * Implements the QT_Cluster algorithm. (QT stands for Quality
+ * Threshold/diameter of the cluster)
+ * See  http://en.wikipedia.org/wiki/Data_clustering#Types_of_clustering
  * and http://www.genome.org/cgi/content/full/9/11/1106 Heyer LJ et al 1999.
- * This implementation should be fairly efficient. Memory needed by the algorithm is allocated
- * only at the beginning of the clustering process (not as clustering proceeds).
- * The implementation makes it easy to plugin a new distance similarity measure or a new linkage
- * method (just implement the interface  SimilarityDistanceCalculator).
+ * This implementation should be fairly efficient. Memory needed by the
+ * algorithm is allocated only at the beginning of the clustering process
+ * (not as clustering proceeds). The implementation makes it easy to plugin
+ * a new distance similarity measure or a new linkage method
+ * (just implement the interface
+ * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}).
  *
  * @author Fabien Campagne
- *         Date: Oct 2, 2005
- *         Time: 6:23:51 PM
+ * Date: Oct 2, 2005
+ * Time: 6:23:51 PM
  */
 public final class QTClusterer {
     private final int clusterCount;
@@ -60,9 +81,10 @@ public final class QTClusterer {
     }
 
     /**
-     * Indicate that clusters cannot overlap. If clustersCannotOverlap is true, then clustering
-     * will produce clusters that do not overlap. If clustersCannotOverlap is false, overlapping
-     * is allowed, and some instances will be part of several clusters.
+     * Indicate that clusters cannot overlap. If clustersCannotOverlap is true,
+     * then clustering will produce clusters that do not overlap. If
+     * clustersCannotOverlap is false, overlapping is allowed, and some
+     * instances will be part of several clusters.
      *
      * @param clustersCannotOverlap
      */
@@ -70,7 +92,8 @@ public final class QTClusterer {
         this.clustersCannotOverlap = clustersCannotOverlap;
     }
 
-    public List<int[]> cluster(final SimilarityDistanceCalculator calculator, final float qualityThreshold) {
+    public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
+                               final float qualityThreshold) {
         final List<int[]> result = new ArrayList<int[]>();
         final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();      // set of instances to ignore. Map returns
         // true if instance must be ignored.
@@ -78,7 +101,9 @@ public final class QTClusterer {
         return result;
     }
 
-    private void cluster(final List<int[]> result, final SimilarityDistanceCalculator calculator, final float qualityThreshold,
+    private void cluster(final List<int[]> result,
+                         final SimilarityDistanceCalculator calculator,
+                         final float qualityThreshold,
                          final Int2BooleanMap ignoreList, int instancesLeft) {
         resetTmpClusters();
         if (instancesLeft <= 1) { // one instance -> one cluster

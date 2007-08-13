@@ -36,7 +36,7 @@
   </component>
   <component name="CheckStyle-IDEA">
     <checkstyle-config>
-      <property name="config-file">$PROJECT_DIR$\config\checkstyle\clustering_checks.xml</property>
+      <property name="config-file">$PROJECT_DIR$/../clustering\config\checkstyle\clustering_checks.xml</property>
     </checkstyle-config>
   </component>
   <component name="CodeStyleProjectProfileManger">
