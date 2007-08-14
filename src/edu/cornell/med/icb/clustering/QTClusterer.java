@@ -93,8 +93,8 @@ public final class QTClusterer {
     }
 
     /**
-     * Groups instances into clusters. Returns the indices of the instances that belong to a cluster
-     * as an int array in the list result.
+     * Groups instances into clusters. Returns the indices of the instances
+     * that belong to a cluster as an int array in the list result.
      * @param calculator The distance calculator to
      * @param qualityThreshold  The QT clustering algorithm quality threshold.
      * @return The list of clusters.
@@ -205,7 +205,8 @@ public final class QTClusterer {
      * @return True if instance appended to cluster, false otherwise
      */
     public boolean addToCluster(final int instanceIndex, final int clusterIndex) {
-        assert instanceIndex != Integer.MAX_VALUE : "instance Index ==" + Integer.MAX_VALUE + " is not supported";
+        assert instanceIndex != Integer.MAX_VALUE : "instance Index =="
+                + Integer.MAX_VALUE + " is not supported";
         // return immediately if instance already in cluster;
         for (int i = 0; i < clusterSizes[clusterIndex]; ++i) {
             if (clusters[clusterIndex][i] == instanceIndex) {
@@ -223,8 +224,8 @@ public final class QTClusterer {
     /**
      * Returns the list of clusters produced by clustering.
      *
-     * @return A list of integer arrays, where each array represents a cluster and contains the index of the
-     *         instance that belongs to a given cluster.
+     * @return A list of integer arrays, where each array represents a cluster
+     * and contains the index of the instance that belongs to a given cluster.
      */
     public List<int[]> getClusters() {
         final List<int[]> result = new ArrayList<int[]>();

@@ -27,7 +27,8 @@ package edu.cornell.med.icb.clustering;
  * Date: Oct 4, 2005
  * Time: 5:35:52 PM
  */
-public abstract class MaxLinkageDistanceCalculator implements SimilarityDistanceCalculator {
+public abstract class MaxLinkageDistanceCalculator
+        implements SimilarityDistanceCalculator {
     /**
      * Returns the distance between an instance and the instances in a cluster.
      * The default implementation calculates maximum linkeage (max of the
@@ -37,8 +38,8 @@ public abstract class MaxLinkageDistanceCalculator implements SimilarityDistance
      * Other elements must not be accessed.
      * @param instanceIndex Index of the instance that is compared to the
      * cluster.
+     * @return the distance between an instance and the instances in a cluster.
      */
-
     public final double distance(final int[] cluster, final int clusterSize,
                                  final int instanceIndex) {
         double maxDistance = 0;
@@ -46,13 +47,21 @@ public abstract class MaxLinkageDistanceCalculator implements SimilarityDistance
         for (int i = 0; i < clusterSize; ++i) {
             final int anInstance = cluster[i];
 
-            maxDistance = Math.max(distance(anInstance, instanceIndex), maxDistance);
+            maxDistance =
+                    Math.max(distance(anInstance, instanceIndex), maxDistance);
         }
 
         return maxDistance;
     }
 
+    /**
+     * When some distances between instance pairs are missing/unknown the
+     * ignoreDistance is returned. The clustering algorithm uses ignoreDistance
+     * to recognize cases when the distance is unknown.
+     *
+     * @return The minimum integer value, so that max(min, a)=a;
+     */
     public final double getIgnoreDistance() {
-        return Integer.MIN_VALUE; // Return the minimum integer value, so that max(min, a)=a;
+        return Integer.MIN_VALUE;
     }
 }

@@ -28,16 +28,23 @@ package edu.cornell.med.icb.clustering;
  */
 public interface SimilarityDistanceCalculator {
     /**
-     * Returns the distance between two instances. *
+     * Returns the distance between two instances.
      *
      * @param instanceIndex Index of the first instance.
      * @param otherInstanceIndex  Index of the second instance.
      * @return distance measure between the two instances.
      */
-    double distance(final int instanceIndex, final int otherInstanceIndex);
+    double distance(int instanceIndex, int otherInstanceIndex);
 
     /**
      * Returns the distance between an instance and the instances in a cluster.
+     *
+     * @param cluster Cluster array
+     * @param clusterSize Number of the cluster array that contain instances.
+     * Other elements must not be accessed.
+     * @param instanceIndex Index of the instance that is compared to the
+     * cluster.
+     * @return the distance between an instance and the instances in a cluster.
      */
     double distance(int[] cluster, int clusterSize, int instanceIndex);
 
