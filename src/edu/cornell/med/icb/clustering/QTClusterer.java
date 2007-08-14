@@ -92,6 +92,13 @@ public final class QTClusterer {
         this.clustersCannotOverlap = clustersCannotOverlap;
     }
 
+    /**
+     * Groups instances into clusters. Returns the indices of the instances that belong to a cluster
+     * as an int array in the list result.
+     * @param calculator The distance calculator to
+     * @param qualityThreshold  The QT clustering algorithm quality threshold.
+     * @return The list of clusters.
+     */
     public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
                                final float qualityThreshold) {
         final List<int[]> result = new ArrayList<int[]>();
@@ -193,8 +200,8 @@ public final class QTClusterer {
     /**
      * Add an instance to a cluster.
      *
-     * @param instanceIndex
-     * @param clusterIndex
+     * @param instanceIndex Index of the instance to add to the cluster.
+     * @param clusterIndex  Index of the cluster where to add the instance.
      * @return True if instance appended to cluster, false otherwise
      */
     public boolean addToCluster(final int instanceIndex, final int clusterIndex) {
