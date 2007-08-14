@@ -31,6 +31,11 @@
         </fileset>
     </path>
 
+    <path id="classpath">
+        <pathelement location="${classes}"/>
+        <path refid="compile.classpath"/>
+    </path>
+
     <path id="cobertura.classpath">
         <fileset dir="${lib}/cobertura">
             <include name="*.jar"/>
@@ -109,17 +114,17 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile" description="Create a jar file for rbdg">
+    <target name="jar" depends="compile" description="Create a jar file for clustering tools">
         <jar jarfile="clustering.jar">
-            <fileset dir="${classes}"/>
             <manifest>
-                <attribute name="Specification-Title" value="clustering"/>
+                <attribute name="Specification-Title" value="Clustering Tools"/>
                 <attribute name="Specification-Vendor"
                            value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
                 <attribute name="Implementation-Version" value="${label} (${buildstamp})"/>
                 <attribute name="Implementation-Vendor"
                            value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
             </manifest>
+            <fileset dir="${classes}"/>
         </jar>
     </target>
 
@@ -137,7 +142,7 @@
                 <pathelement location="${classes}"/>
             </classpath>
             <bottom>
-                <![CDATA[<i>Copyright &#169; 2006-${year} Institute for Computational Biomedicine, All Rights Reserved.</i>]]>
+                <![CDATA[<i>Copyright &#169; 2005-${year} Institute for Computational Biomedicine, All Rights Reserved.</i>]]>
             </bottom>
         </javadoc>
     </target>
@@ -317,4 +322,33 @@
               includes="jdepend-report.xml"
               style="${ant.home}/etc/jdepend.xsl" />
     </target>
+
+    <target name="autojar" description="Create a jar file for clustering tools using autojar" depends="compile">
+        <manifest file="MANIFEST.MF">
+            <attribute name="Specification-Title" value="Clustering Tools"/>
+            <attribute name="Specification-Vendor"
+                       value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
+            <attribute name="Implementation-Version" value="${label} (${buildstamp})"/>
+            <attribute name="Implementation-Vendor"
+                       value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
+        </manifest>
+
+        <java jar="${lib}/autojar/autojar.jar" dir="${basedir}" fork="true" failonerror="true">
+            <classpath>
+                <fileset dir="${lib}/autojar">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <arg value="-v"/>
+            <arg value="-b"/>
+            <arg value="-c"/>
+            <arg pathref="classpath"/>
+            <arg value="-e"/>
+            <arg line="-o clustering.jar"/>
+            <arg line="-m MANIFEST.MF"/>
+        	<arg value="edu/cornell/med/icb/clustering/*.class"/>
+        </java>
+
+        <delete file="MANIFEST.MF" failonerror="true"/>
+	</target>
 </project>
