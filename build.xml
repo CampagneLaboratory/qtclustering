@@ -135,7 +135,7 @@
     <target name="javadocs" depends="init" description="generates the API documentation">
         <mkdir dir="${javadocs}"/>
         <javadoc packagenames="edu.cornell.med.*" source="1.5"
-                 sourcepath="${src}" destdir="${javadocs}"
+                 sourcepath="${src}" destdir="${javadocs}" encoding="UTF-8"
                  author="true" version="true" windowtitle="Clustering API">
             <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
             <classpath>

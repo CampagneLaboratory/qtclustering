@@ -1,3 +1,18 @@
+The clustering library contains Java based classes to aid in the classification
+of objects into different groups, or more precisely, the partitioning of
+a data set into subsets (clusters), so that the data in each subset (ideally)
+share some common trait - often proximity according to some defined distance
+measure.
+
+The clustering library requires Java 5 or better and the fastutil
+(http://fastutil.dsi.unimi.it/) library.  The binary distribution of
+the clustering library contains two jar files described as follows:
+
+  - clustering,jar        includes all the external classes needed to run
+                          (i.e., fastutil)
+  - clustering-core.jar   includes only the project classes and will require a
+                          fastutil.jar to use in your own projects.
+
 This is free software distributed under the GNU Lesser General Public License.
 
 Institute for Computational Biomedicine
