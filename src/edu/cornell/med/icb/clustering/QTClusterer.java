@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implements the QT_Cluster algorithm. (QT stands for Quality
+ * Implements the QT Clustering algorithm. (QT stands for Quality
  * Threshold/diameter of the cluster)
  * See  http://en.wikipedia.org/wiki/Data_clustering#Types_of_clustering
  * and http://www.genome.org/cgi/content/full/9/11/1106 Heyer LJ et al 1999.

@@ -19,6 +19,7 @@
     <property name="test-classes" location="test-classes"/>
     <property name="cobertura-classes" location="cobertura-classes"/>
     <property name="test-results" location="test-results"/>
+    <property name="jarfile" value="clustering.jar"/>
 
     <property name="debug" value="on"/>
     <property name="optimize" value="on"/>
@@ -115,7 +116,7 @@
     </target>
 
     <target name="jar" depends="compile" description="Create a jar file for clustering tools">
-        <jar jarfile="clustering.jar">
+        <jar jarfile="${jarfile}">
             <manifest>
                 <attribute name="Specification-Title" value="Clustering Tools"/>
                 <attribute name="Specification-Vendor"
@@ -157,7 +158,7 @@
         <delete dir="${cobertura-classes}"/>
         <delete file="cobertura.ser"/>
 
-        <delete file="clustering.jar"/>
+        <delete file="${jarfile}"/>
         <delete dir="${logs}"/>
     </target>
 
@@ -199,7 +200,6 @@
     <target name="checkstyle" depends="init" description="Checks source against coding standards">
         <checkstyle config="${config}/checkstyle/clustering_checks.xml" failonviolation="no">
             <fileset dir="${src}"/>
-            <fileset dir="${test-src}"/>
             <classpath refid="test.classpath"/>
             <formatter type="xml" toFile="${test-results}/checkstyle_errors.xml"/>
             <formatter type="plain"/>
@@ -212,9 +212,6 @@
     <target name="pmd" depends="init" description="Scan Java source code and look for potential problems">
         <pmd targetjdk="1.5" failonerror="true" failurespropertyname="pmderrors" shortfilenames="true" encoding="utf-8">
             <fileset dir="${src}">
-                <include name="**/*.java"/>
-            </fileset>
-            <fileset dir="${test-src}">
                 <include name="**/*.java"/>
             </fileset>
             <ruleset>basic</ruleset>
@@ -344,8 +341,10 @@
             <arg value="-c"/>
             <arg pathref="classpath"/>
             <arg value="-e"/>
-            <arg line="-o clustering.jar"/>
-            <arg line="-m MANIFEST.MF"/>
+            <arg value="-o"/>
+            <arg value="${jarfile}"/>
+            <arg value="-m"/>
+            <arg value="MANIFEST.MF"/>
         	<arg value="edu/cornell/med/icb/clustering/*.class"/>
         </java>
 

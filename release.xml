@@ -80,6 +80,7 @@
     <target name="binary" depends="jar, javadocs" description="assemble a binary release">
         <zip destfile="${binfile}" comment="clustering version: ${tag}">
             <fileset dir="${exportdir}">
+                <include name="${tag}/clustering-core.jar"/>
                 <include name="${tag}/clustering.jar"/>
                 <include name="${tag}/javadocs/**"/>
                 <include name="${tag}/COPYING"/>
@@ -89,7 +90,7 @@
     </target>
 
     <target name="javadocs" depends="init">
-        <ant target="javadocs" dir="${exportdir}/${tag}">
+        <ant target="javadocs" dir="${exportdir}/${tag}" inheritall="true" inheritrefs="true">
             <property name="config" location="${basedir}/config"/>
         </ant>
     </target>
@@ -99,12 +100,19 @@
     </target>
 
     <target name="distclean" depends="export">
-        <ant target="clean" dir="${exportdir}/${tag}"/>
+        <ant target="clean" dir="${exportdir}/${tag}" inheritall="true" inheritrefs="true"/>
     </target>
 
     <target name="jar" description="create and package the jar files">
-        <ant target="jar" dir="${exportdir}/${tag}">
-            <property name="build-version" value="${tag}"/>
+        <ant target="jar" dir="${exportdir}/${tag}" inheritall="true" inheritrefs="true">
+            <property name="buildstamp" value="${tag}"/>
+            <property name="jarfile" value="clustering-core.jar"/>
+        </ant>
+        <copy file="${exportdir}/${tag}/clustering-core.jar" todir="${releasedir}"/>
+
+        <ant target="autojar" dir="${exportdir}/${tag}" inheritall="true" inheritrefs="true">
+            <property name="buildstamp" value="${tag}"/>
+            <property name="jarfile" value="clustering.jar"/>
         </ant>
         <copy file="${exportdir}/${tag}/clustering.jar" todir="${releasedir}"/>
     </target>
