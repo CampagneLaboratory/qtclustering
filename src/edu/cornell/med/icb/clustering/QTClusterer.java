@@ -232,7 +232,7 @@ public final class QTClusterer {
         final int resultClusterCount = clusterCount;
 
         for (int l = 0; l < resultClusterCount; ++l) {
-            final int[] trimmedCluster = new int[clusterSizes[l]];
+            final int[] trimmedCluster = new int[clusterSizes[l]]; // NOPMD
             System.arraycopy(clusters[l], 0, trimmedCluster, 0, clusterSizes[l]);
             result.add(trimmedCluster);
         }
