@@ -14,7 +14,11 @@
         <format property="exportdate" pattern="yyyyMMddHHmmss"/>
     </tstamp>
 
-    <target name="init" depends="gettag">
+    <target name="checklabel" unless="force">
+        <fail unless="label" message="LABEL IS NOT SET"/>
+    </target>
+
+    <target name="init" depends="checklabel, gettag">
         <property name="exportdir" value="tmp-${tag}"/>
         <property name="releasedir" value="release-${tag}"/>
 
