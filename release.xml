@@ -112,7 +112,7 @@
 
         <ant target="autojar" dir="${exportdir}/${tag}" inheritall="true" inheritrefs="true">
             <property name="buildstamp" value="${tag}"/>
-            <property name="jarfile" value="clustering.jar"/>
+            <property name="autojarfile" value="clustering.jar"/>
         </ant>
         <copy file="${exportdir}/${tag}/clustering.jar" todir="${releasedir}"/>
     </target>

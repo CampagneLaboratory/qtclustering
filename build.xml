@@ -19,7 +19,8 @@
     <property name="test-classes" location="test-classes"/>
     <property name="cobertura-classes" location="cobertura-classes"/>
     <property name="test-results" location="test-results"/>
-    <property name="jarfile" value="clustering.jar"/>
+    <property name="jarfile" value="clustering-core.jar"/>
+    <property name="autojarfile" value="clustering.jar"/>
 
     <property name="debug" value="on"/>
     <property name="optimize" value="on"/>
@@ -158,12 +159,13 @@
         <delete dir="${cobertura-classes}"/>
         <delete file="cobertura.ser"/>
 
+        <delete file="${autojarfile}"/>
         <delete file="${jarfile}"/>
         <delete dir="${logs}"/>
     </target>
 
     <target name="cruisecontrol" depends="clean, cobertura-setup, findbugs,
-                  test, jar, javadocs, pmd, cpd, checkstyle, cobertura-report"
+                  test, jar, autojar, javadocs, pmd, cpd, checkstyle, cobertura-report"
             description="Run CruiseControl Build and Tests"/>
 
     <target name="test" depends="compile-tests, cobertura-instrument" description="Run JUnit Tests">
@@ -342,7 +344,7 @@
             <arg pathref="classpath"/>
             <arg value="-e"/>
             <arg value="-o"/>
-            <arg value="${jarfile}"/>
+            <arg value="${autojarfile}"/>
             <arg value="-m"/>
             <arg value="MANIFEST.MF"/>
         	<arg value="edu/cornell/med/icb/clustering/*.class"/>
