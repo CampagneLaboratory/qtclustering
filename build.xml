@@ -169,6 +169,7 @@
             <fileset dir="${basedir}">
                 <include name="release*/**"/>
                 <include name="tmp*/**"/>
+                <include name="release"/>
             </fileset>
         </delete>
     </target>
@@ -178,9 +179,7 @@
             description="Run CruiseControl Build and Tests"/>
 
     <target name="release" description="Create a tagged release (intended to be run from cruisecontrol)">
-        <ant antfile="release.xml" inheritall="true" inheritrefs="true">
-            <property name="tag" value="clustering_${buildstamp}"/>
-        </ant>
+        <ant antfile="release.xml"/>
     </target>
 
     <target name="test" depends="compile-tests, cobertura-instrument" description="Run JUnit Tests">
