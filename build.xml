@@ -167,8 +167,8 @@
     <target name="distclean">
         <delete>
             <dirset dir="${basedir}">
-                <include name="release-clustering*"/>
-                <include name="tmp-clustering*"/>
+                <include name="release*"/>
+                <include name="tmp*"/>
             </dirset>
         </delete>
     </target>
