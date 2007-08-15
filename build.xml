@@ -165,6 +165,7 @@
     </target>
 
     <target name="distclean">
+        <symlink action="delete" link="release" failonerror="false"/>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
                 <include name="release*/**"/>
@@ -172,7 +173,6 @@
                 <exclude name="release.xml"/>
             </fileset>
         </delete>
-         <symlink action="delete" link="release" failonerror="false"/>
     </target>
 
     <target name="cruisecontrol" depends="clean, cobertura-setup, findbugs,
