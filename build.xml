@@ -165,11 +165,11 @@
     </target>
 
     <target name="distclean">
-        <delete>
-            <dirset dir="${basedir}">
-                <include name="release*"/>
-                <include name="tmp*"/>
-            </dirset>
+        <delete includeemptydirs="true">
+            <fileset dir="${basedir}">
+                <include name="release*/**"/>
+                <include name="tmp*/**"/>
+            </fileset>
         </delete>
     </target>
 
