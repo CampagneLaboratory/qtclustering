@@ -169,6 +169,7 @@
             <fileset dir="${basedir}">
                 <include name="release*/**"/>
                 <include name="tmp*/**"/>
+                <exclude name="release.xml"/>
             </fileset>
         </delete>
          <symlink action="delete" link="release" failonerror="false"/>
