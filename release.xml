@@ -43,7 +43,7 @@
     <target name="tag" depends="init" unless="nocopy" description="Tag the current trunk release in SVN">
         <echo level="info" message="Tagging current directory with ${tag}"/>
         <svn>
-    		<copy message="${tag}" srcUrl="svn://${svnhost}/svn/trunk/clustering"
+    		<copy message="Clustering release ${label} ${tag}" srcUrl="svn://${svnhost}/svn/trunk/clustering"
     			  destUrl="${tagUrl}"/>
     	</svn>
     </target>
