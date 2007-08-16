@@ -63,7 +63,6 @@
 
     <target name="release" description="Tag and release build"
             depends="tag, source, binary, apidocs">
-        <symlink link="release" resource="${releasedir}" overwrite="true" failonerror="false"/>
         <!-- copy the zip to the web folder -->
         <!-- todo -->
         <!-- notify webmaster about new file -->
