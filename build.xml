@@ -179,12 +179,6 @@
                   test, jar, autojar, javadocs, pmd, cpd, checkstyle, cobertura-report"
             description="Run CruiseControl Build and Tests"/>
 
-    <target name="release" description="Create a tagged release (intended to be run from cruisecontrol)">
-        <ant antfile="release.xml">
-            <property name="tag" value="clustering_${cctimestamp}"/>
-        </ant>
-    </target>
-
     <target name="test" depends="compile-tests, cobertura-instrument" description="Run JUnit Tests">
         <junit dir="${basedir}" fork="true" printsummary="yes" haltonfailure="yes" haltonerror="yes" showoutput="yes">
             <sysproperty key="net.sourceforge.cobertura.datafile"
