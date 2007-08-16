@@ -137,7 +137,8 @@
         <mkdir dir="${javadocs}"/>
         <javadoc packagenames="edu.cornell.med.*" source="1.5"
                  sourcepath="${src}" destdir="${javadocs}" encoding="UTF-8"
-                 author="true" version="true" windowtitle="Clustering API">
+                 author="true" version="true" windowtitle="Clustering API ${label} (${buildstamp})"
+                 header="Clustering API ${label} (${buildstamp})">
             <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
             <classpath>
                 <path refid="compile.classpath"/>
