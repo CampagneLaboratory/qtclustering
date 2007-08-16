@@ -165,7 +165,6 @@
     </target>
 
     <target name="distclean">
-        <symlink action="delete" link="release" failonerror="false"/>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
                 <include name="release*/**"/>
