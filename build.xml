@@ -1,4 +1,4 @@
-<project name="clustering" default="test" basedir=".">
+<project name="qtclustering" default="test" basedir=".">
     <tstamp>
         <!-- current time for buildstamp purposes -->
         <format property="buildstamp" pattern="yyyyMMddHHmmss"/>
@@ -19,8 +19,8 @@
     <property name="test-classes" location="test-classes"/>
     <property name="cobertura-classes" location="cobertura-classes"/>
     <property name="test-results" location="test-results"/>
-    <property name="jarfile" value="clustering-core.jar"/>
-    <property name="autojarfile" value="clustering.jar"/>
+    <property name="jarfile" value="qtclustering-core.jar"/>
+    <property name="autojarfile" value="qtclustering.jar"/>
 
     <property name="debug" value="on"/>
     <property name="optimize" value="on"/>
@@ -119,7 +119,7 @@
     <target name="jar" depends="compile" description="Create a jar file for clustering tools">
         <jar jarfile="${jarfile}">
             <manifest>
-                <attribute name="Specification-Title" value="Clustering Tools"/>
+                <attribute name="Specification-Title" value="QtClustering Tools"/>
                 <attribute name="Specification-Vendor"
                            value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
                 <attribute name="Implementation-Version" value="${label} (${buildstamp})"/>
@@ -137,8 +137,8 @@
         <mkdir dir="${javadocs}"/>
         <javadoc packagenames="edu.cornell.med.*" source="1.5"
                  sourcepath="${src}" destdir="${javadocs}" encoding="UTF-8"
-                 author="true" version="true" windowtitle="Clustering API ${label} (${buildstamp})"
-                 header="Clustering API ${label} (${buildstamp})">
+                 author="true" version="true" windowtitle="QtClustering API ${label} (${buildstamp})"
+                 header="QtClustering API ${label} (${buildstamp})">
             <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
             <classpath>
                 <path refid="compile.classpath"/>
@@ -211,7 +211,7 @@
     </target>
 
     <target name="checkstyle" depends="init" description="Checks source against coding standards">
-        <checkstyle config="${config}/checkstyle/clustering_checks.xml" failonviolation="no">
+        <checkstyle config="${config}/checkstyle/qtclustering_checks.xml" failonviolation="no">
             <fileset dir="${src}"/>
             <classpath refid="test.classpath"/>
             <formatter type="xml" toFile="${test-results}/checkstyle_errors.xml"/>
@@ -335,7 +335,7 @@
 
     <target name="autojar" description="Create a jar file for clustering tools using autojar" depends="compile">
         <manifest file="MANIFEST.MF">
-            <attribute name="Specification-Title" value="Clustering Tools"/>
+            <attribute name="Specification-Title" value="QtClustering Tools"/>
             <attribute name="Specification-Vendor"
                        value="Institute for Computational Biomedicine (ICB), Weill Medical College of Cornell University"/>
             <attribute name="Implementation-Version" value="${label} (${buildstamp})"/>

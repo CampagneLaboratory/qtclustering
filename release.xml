@@ -32,7 +32,7 @@
 
     <target name="gettag" unless="tag">
         <!-- the default tag uses the current date and time -->
-        <property name="defaulttag" value="clustering_${exportdate}"/>
+        <property name="defaulttag" value="qtclustering_${exportdate}"/>
 
         <input message="Enter a tag for the build [${defaulttag}]:"
                addproperty="tag"
@@ -43,7 +43,7 @@
     <target name="tag" depends="init" unless="nocopy" description="Tag the current trunk release in SVN">
         <echo level="info" message="Tagging current directory with ${tag}"/>
         <svn>
-    		<copy message="Clustering release ${label} ${tag}" srcUrl="svn://${svnhost}/svn/trunk/clustering"
+    		<copy message="QtClustering release ${label} ${tag}" srcUrl="svn://${svnhost}/svn/trunk/qtclustering"
     			  destUrl="${tagUrl}"/>
     	</svn>
     </target>
@@ -73,7 +73,7 @@
     </target>
 
     <target name="source" depends="distclean" description="assemble a source code release">
-        <zip destfile="${srcfile}" comment="clustering version: ${tag}">
+        <zip destfile="${srcfile}" comment="qtclustering version: ${tag}">
             <fileset dir="${exportdir}">
                 <exclude name="${tag}/lib/**"/>
             </fileset>
@@ -81,10 +81,10 @@
     </target>
 
     <target name="binary" depends="jar, javadocs" description="assemble a binary release">
-        <zip destfile="${binfile}" comment="clustering version: ${tag}">
+        <zip destfile="${binfile}" comment="qtclustering version: ${tag}">
             <fileset dir="${exportdir}">
-                <include name="${tag}/clustering-core.jar"/>
-                <include name="${tag}/clustering.jar"/>
+                <include name="${tag}/qtclustering-core.jar"/>
+                <include name="${tag}/qtclustering.jar"/>
                 <include name="${tag}/javadocs/**"/>
                 <include name="${tag}/COPYING"/>
                 <include name="${tag}/README"/>
@@ -99,7 +99,7 @@
     </target>
     <target name="apidocs" depends="javadocs">
         <!-- zip the api documentation for the website -->
-        <zip destfile="${apidocfile}" basedir="${exportdir}" includes="${tag}/javadocs/**" comment="clustering version: ${tag}"/>
+        <zip destfile="${apidocfile}" basedir="${exportdir}" includes="${tag}/javadocs/**" comment="qtclustering version: ${tag}"/>
     </target>
 
     <target name="distclean" depends="export">
@@ -109,14 +109,14 @@
     <target name="jar" description="create and package the jar files">
         <ant target="jar" dir="${exportdir}/${tag}" inheritall="true" inheritrefs="true">
             <property name="buildstamp" value="${tag}"/>
-            <property name="jarfile" value="clustering-core.jar"/>
+            <property name="jarfile" value="qtclustering-core.jar"/>
         </ant>
-        <copy file="${exportdir}/${tag}/clustering-core.jar" todir="${releasedir}"/>
+        <copy file="${exportdir}/${tag}/qtclustering-core.jar" todir="${releasedir}"/>
 
         <ant target="autojar" dir="${exportdir}/${tag}" inheritall="true" inheritrefs="true">
             <property name="buildstamp" value="${tag}"/>
-            <property name="autojarfile" value="clustering.jar"/>
+            <property name="autojarfile" value="qtclustering.jar"/>
         </ant>
-        <copy file="${exportdir}/${tag}/clustering.jar" todir="${releasedir}"/>
+        <copy file="${exportdir}/${tag}/qtclustering.jar" todir="${releasedir}"/>
     </target>
 </project>

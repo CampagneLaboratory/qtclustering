@@ -1,8 +1,8 @@
-The clustering library contains Java based classes to aid in the classification
-of objects into different groups, or more precisely, the partitioning of
-a data set into subsets (clusters), so that the data in each subset (ideally)
-share some common trait - often proximity according to some defined distance
-measure.
+The qtclustering library contains Java based classes to aid in the
+classification of objects into different groups, or more precisely, the
+partitioning of a data set into subsets (clusters), so that the data in
+each subset (ideally) share some common trait - often proximity according
+to some defined distance measure.
 
 The clustering library requires Java 5 or better and the fastutil
 (http://fastutil.dsi.unimi.it/) library.  The binary distribution of
