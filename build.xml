@@ -140,6 +140,7 @@
                  author="true" version="true" windowtitle="QtClustering API ${label} (${buildstamp})"
                  header="QtClustering API ${label} (${buildstamp})">
             <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
+            <link href="http://fastutil.dsi.unimi.it/docs/"/>
             <classpath>
                 <path refid="compile.classpath"/>
                 <pathelement location="${classes}"/>
