@@ -216,7 +216,7 @@
             <fileset dir="${src}"/>
             <classpath refid="test.classpath"/>
             <formatter type="xml" toFile="${test-results}/checkstyle_errors.xml"/>
-            <formatter type="plain"/>
+            <formatter type="plain" useFile="false"/>
         </checkstyle>
 
         <xslt in="${test-results}/checkstyle_errors.xml" out="${test-results}/html/checkstyle/index.html"
