@@ -212,7 +212,7 @@
     </target>
 
     <target name="checkstyle" depends="init" description="Checks source against coding standards">
-        <checkstyle config="${config}/checkstyle/qtclustering_checks.xml" failonviolation="no">
+        <checkstyle config="${config}/checkstyle/qtclustering_checks.xml" failonviolation="true">
             <fileset dir="${src}"/>
             <classpath refid="test.classpath"/>
             <formatter type="xml" toFile="${test-results}/checkstyle_errors.xml"/>
