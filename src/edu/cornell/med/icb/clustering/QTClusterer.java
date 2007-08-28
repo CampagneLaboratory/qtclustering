@@ -36,7 +36,7 @@ import java.util.List;
  * (not as clustering proceeds). The implementation makes it easy to plugin
  * a new distance similarity measure or a new linkage method
  * (just implement the interface
- * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}).
+ * {@link SimilarityDistanceCalculator}).
  *
  * @author Fabien Campagne
  * Date: Oct 2, 2005
@@ -65,16 +65,16 @@ public final class QTClusterer {
     /**
      * Construct a new quality threshold clusterer.
      *
-     * @param instanceCount The number of instances to cluster.
+     * @param numberOfInstances The number of instances to cluster.
      */
-    public QTClusterer(final int instanceCount) {
+    public QTClusterer(final int numberOfInstances) {
         super();
-        clusterCount = instanceCount;
+        clusterCount = numberOfInstances;
         // Data elements are available only if k<clusterSizes[l]
-        clusters = new int[clusterCount][instanceCount];
+        clusters = new int[clusterCount][numberOfInstances];
         // number of instances in each cluster.
         clusterSizes = new int[clusterCount];
-        this.instanceCount = instanceCount;
+        this.instanceCount = numberOfInstances;
 
         resetTmpClusters();
         jVisited = new Int2BooleanAVLTreeMap();
@@ -82,8 +82,10 @@ public final class QTClusterer {
         setClustersCannotOverlap(true);
     }
 
+    /**
+     * Initialize instance index in clusters to value that is not supported.
+     */
     private void resetTmpClusters() {
-        // initialize instance index in clusters to value that is not supported.
         for (final int[] cluster : clusters) {
             for (int i = 0; i < cluster.length; ++i) {
                 cluster[i] = Integer.MAX_VALUE;
@@ -100,10 +102,10 @@ public final class QTClusterer {
      * clustersCannotOverlap is false, overlapping is allowed, and some
      * instances will be part of several clusters.
      *
-     * @param clustersCannotOverlap
+     * @param cannotOverlap Indicates whether or not clusters can overlap
      */
-    public void setClustersCannotOverlap(final boolean clustersCannotOverlap) {
-        this.clustersCannotOverlap = clustersCannotOverlap;
+    public void setClustersCannotOverlap(final boolean cannotOverlap) {
+        this.clustersCannotOverlap = cannotOverlap;
     }
 
     /**
@@ -115,7 +117,6 @@ public final class QTClusterer {
      */
     public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
                                final float qualityThreshold) {
-        // TODO configure the time interval
         final ProgressLogger progressLogger =
                 new ProgressLogger(LOGGER, logInterval, "clusters");
         progressLogger.displayFreeMemory = true;
@@ -133,6 +134,18 @@ public final class QTClusterer {
         return result;
     }
 
+    /**
+     * Performs the actual clustering.
+     *
+     * @param result A list that should be used to store the results.
+     * @param calculator The {@link SimilarityDistanceCalculator} that
+     * should be used when clustering
+     * @param qualityThreshold
+     * @param ignoreList
+     * @param instances
+     * @param progressLogger A {@link ProgressLogger} that should used to
+     * update clustering progress.
+     */
     private void cluster(final List<int[]> result,
                          final SimilarityDistanceCalculator calculator,
                          final float qualityThreshold,
@@ -160,53 +173,56 @@ public final class QTClusterer {
         }
 
         for (int i = 0; i < instanceCount; ++i) { // i : cluster index
-            if (clustersCannotOverlap && ignoreList.get(i)) {
-                continue; // ignore instance i if part of previously selected clusters.
-            }
-            boolean done = false;
-            addToCluster(i, i);
-            jVisited.clear();
-            while (!done && instancesLeft > 1) {
-                double distance_i_j = Double.MAX_VALUE;
-                int minDistanceInstanceIndex = -1;
+            // ignore instance i if part of previously selected clusters.
+            if (!clustersCannotOverlap || !ignoreList.get(i)) {
+                boolean done = false;
+                addToCluster(i, i);
+                jVisited.clear();
+                while (!done && instancesLeft > 1) {
+                    double distance_i_j = Double.MAX_VALUE;
+                    int minDistanceInstanceIndex = -1;
 
-                for (int j = 0; j < instanceCount; ++j) { // find instance j such that distance i,j minimum
-                    if (ignoreList.get(j)) {
-                        continue;
-                    }
-                    if (i != j) {
-                        if (jVisited.get(j)) {
-                            continue;
+                    // find instance j such that distance i,j minimum
+                    for (int j = 0; j < instanceCount; ++j) {
+                        if (!ignoreList.get(j)) {
+                            if (i != j) {
+                                if (!jVisited.get(j)) {
+                                    final double newDistance =
+                                            calculator.distance(clusters[i],
+                                                    clusterSizes[i], j);
+
+                                    if (newDistance < distance_i_j) {
+                                        distance_i_j = newDistance;
+                                        minDistanceInstanceIndex = j;
+                                        jVisited.put(j, true);
+                                    }
+                                }
+                            }
                         }
-
-                        final double newDistance = calculator.distance(clusters[i],
-                                clusterSizes[i], j);
-
-                        if (newDistance < distance_i_j) {
-                            distance_i_j = newDistance;
-                            minDistanceInstanceIndex = j;
-                            jVisited.put(j, true);
-                        }
                     }
-                }
-                // grow clusters until min distance between new instance and cluster reaches quality threshold:
-                if (distance_i_j > qualityThreshold) {
-                    done = true;
-                } else {
-                    if (clustersCannotOverlap && ignoreList.get(minDistanceInstanceIndex)) {
+
+                    // grow clusters until min distance between new instance
+                    // and cluster reaches quality threshold:
+                    if (distance_i_j > qualityThreshold) {
                         done = true;
                     } else {
-                        final boolean added;
-                        added = addToCluster(minDistanceInstanceIndex, i);
-                        if (!added && jVisited.get(minDistanceInstanceIndex)) {
+                        if (clustersCannotOverlap
+                                && ignoreList.get(minDistanceInstanceIndex)) {
                             done = true;
+                        } else {
+                            final boolean added =
+                                    addToCluster(minDistanceInstanceIndex, i);
+                            if (!added
+                                    && jVisited.get(minDistanceInstanceIndex)) {
+                                done = true;
+                            }
                         }
                     }
                 }
             }
         }
 
-        // identify cluster with maximum cardinality:
+        // identify cluster with maximum cardinality
         int maxCardinality = 0;
         int selectedClusterIndex = -1;
         for (int l = 0; l < clusterSizes.length; ++l) {
@@ -215,10 +231,12 @@ public final class QTClusterer {
                 selectedClusterIndex = l;
             }
         }
-        final int[] selectedCluster = getClusters().get(selectedClusterIndex).clone();
+        final int[] selectedCluster =
+                getClusters().get(selectedClusterIndex).clone();
         result.add(selectedCluster);
         for (final int ignoreInstance : selectedCluster) {
-            // mark instances of the selected cluster so that they are ignored in subsequent passes.
+            // mark instances of the selected cluster so that they are
+            // ignored in subsequent passes.
             ignoreList.put(ignoreInstance, true);
             progressLogger.update();
             --instancesLeft;
@@ -234,9 +252,10 @@ public final class QTClusterer {
      *
      * @param instanceIndex Index of the instance to add to the cluster.
      * @param clusterIndex  Index of the cluster where to add the instance.
-     * @return True if instance appended to cluster, false otherwise
+     * @return true if instance appended to cluster, false otherwise
      */
-    public boolean addToCluster(final int instanceIndex, final int clusterIndex) {
+    public boolean addToCluster(final int instanceIndex,
+                                final int clusterIndex) {
         assert instanceIndex != Integer.MAX_VALUE : "instance Index =="
                 + Integer.MAX_VALUE + " is not supported";
         // return immediately if instance already in cluster;
@@ -286,5 +305,4 @@ public final class QTClusterer {
     public void setLogInterval(final long interval) {
         this.logInterval = interval;
     }
-
 }
