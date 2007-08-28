@@ -117,11 +117,11 @@ public final class QTClusterer {
      */
     public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
                                final float qualityThreshold) {
-        final ProgressLogger progressLogger =
+        final ProgressLogger clusterProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "clusters");
-        progressLogger.displayFreeMemory = true;
-        progressLogger.expectedUpdates = instanceCount;
-        progressLogger.start("Starting to cluster");
+        clusterProgressLogger.displayFreeMemory = true;
+        clusterProgressLogger.expectedUpdates = instanceCount;
+        clusterProgressLogger.start("Starting to cluster");
 
         final List<int[]> result = new ArrayList<int[]>();
         // set of instances to ignore.
@@ -129,8 +129,8 @@ public final class QTClusterer {
         final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
 
         cluster(result, calculator, qualityThreshold, ignoreList,
-                instanceCount, progressLogger);
-        progressLogger.done();
+                instanceCount, clusterProgressLogger);
+        clusterProgressLogger.done();
         return result;
     }
 
@@ -172,6 +172,11 @@ public final class QTClusterer {
             return;
         }
 
+        final ProgressLogger loopProgressLogger =
+                new ProgressLogger(LOGGER, logInterval, "iterations");
+        loopProgressLogger.displayFreeMemory = true;
+        loopProgressLogger.start();
+
         for (int i = 0; i < instanceCount; ++i) { // i : cluster index
             // ignore instance i if part of previously selected clusters.
             if (!clustersCannotOverlap || !ignoreList.get(i)) {
@@ -199,6 +204,7 @@ public final class QTClusterer {
                                 }
                             }
                         }
+                        loopProgressLogger.update();
                     }
 
                     // grow clusters until min distance between new instance
@@ -220,6 +226,7 @@ public final class QTClusterer {
                     }
                 }
             }
+            loopProgressLogger.update();
         }
 
         // identify cluster with maximum cardinality
