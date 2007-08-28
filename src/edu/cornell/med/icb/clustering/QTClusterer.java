@@ -20,6 +20,8 @@ package edu.cornell.med.icb.clustering;
 
 import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
+import it.unimi.dsi.mg4j.util.ProgressLogger;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,11 @@ import java.util.List;
  * Time: 6:23:51 PM
  */
 public final class QTClusterer {
+    /**
+     * Used to log debug and informational messages.
+     */
+    private static final Logger LOGGER = Logger.getLogger(QTClusterer.class);
+
     private final int clusterCount;
     private final int[][] clusters;
     private final int[] clusterSizes;
@@ -50,11 +57,18 @@ public final class QTClusterer {
     private final Int2BooleanMap jVisited;
 
     /**
+     * The time interval for a new log in milliseconds.
+     * @see ProgressLogger#DEFAULT_LOG_INTERVAL
+     */
+    private long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
+
+    /**
      * Construct a new quality threshold clusterer.
      *
      * @param instanceCount The number of instances to cluster.
      */
     public QTClusterer(final int instanceCount) {
+        super();
         clusterCount = instanceCount;
         // Data elements are available only if k<clusterSizes[l]
         clusters = new int[clusterCount][instanceCount];
@@ -101,32 +115,47 @@ public final class QTClusterer {
      */
     public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
                                final float qualityThreshold) {
+        // TODO configure the time interval
+        final ProgressLogger progressLogger =
+                new ProgressLogger(LOGGER, logInterval, "clusters");
+        progressLogger.displayFreeMemory = true;
+        progressLogger.expectedUpdates = instanceCount;
+        progressLogger.start("Starting to cluster");
+
         final List<int[]> result = new ArrayList<int[]>();
-        final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();      // set of instances to ignore. Map returns
-        // true if instance must be ignored.
-        cluster(result, calculator, qualityThreshold, ignoreList, instanceCount);
+        // set of instances to ignore.
+        // Map returns true if instance must be ignored.
+        final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
+
+        cluster(result, calculator, qualityThreshold, ignoreList,
+                instanceCount, progressLogger);
+        progressLogger.done();
         return result;
     }
 
     private void cluster(final List<int[]> result,
                          final SimilarityDistanceCalculator calculator,
                          final float qualityThreshold,
-                         final Int2BooleanMap ignoreList, int instancesLeft) {
+                         final Int2BooleanMap ignoreList,
+                         final int instances,
+                         final ProgressLogger progressLogger) {
+        int instancesLeft = instances;
+
         resetTmpClusters();
         if (instancesLeft <= 1) { // one instance -> one cluster
-            if (instancesLeft <= 0) {
-                return;
-            }
-            final int[] singletonCluster = new int[instancesLeft];
+            if (instancesLeft > 0) {
+                final int[] singletonCluster = new int[instancesLeft];
 
-            // find the remaining instance:
-            for (int i = 0; i < instanceCount; ++i) {
-                if (!ignoreList.get(i)) {
-                    singletonCluster[0] = i;
+                // find the remaining instance:
+                for (int i = 0; i < instanceCount; ++i) {
+                    if (!ignoreList.get(i)) {
+                        singletonCluster[0] = i;
+                    }
                 }
-            }
 
-            result.add(singletonCluster);
+                result.add(singletonCluster);
+                progressLogger.update();
+            }
             return;
         }
 
@@ -176,6 +205,7 @@ public final class QTClusterer {
                 }
             }
         }
+
         // identify cluster with maximum cardinality:
         int maxCardinality = 0;
         int selectedClusterIndex = -1;
@@ -190,11 +220,13 @@ public final class QTClusterer {
         for (final int ignoreInstance : selectedCluster) {
             // mark instances of the selected cluster so that they are ignored in subsequent passes.
             ignoreList.put(ignoreInstance, true);
+            progressLogger.update();
             --instancesLeft;
         }
 
         // recurse.
-        cluster(result, calculator, qualityThreshold, ignoreList, instancesLeft);
+        cluster(result, calculator, qualityThreshold, ignoreList,
+                instancesLeft, progressLogger);
     }
 
     /**
@@ -238,4 +270,21 @@ public final class QTClusterer {
         }
         return result;
     }
+
+    /**
+     * Get the the progress logging interval.
+     * @return the logging interval in milliseconds.
+     */
+    public long getLogInterval() {
+        return logInterval;
+    }
+
+    /**
+     * Set the the progress logging interval.
+     * @param interval the logging interval in milliseconds.
+     */
+    public void setLogInterval(final long interval) {
+        this.logInterval = interval;
+    }
+
 }

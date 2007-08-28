@@ -184,6 +184,8 @@
         <junit dir="${basedir}" fork="true" printsummary="yes" haltonfailure="yes" haltonerror="yes" showoutput="yes">
             <sysproperty key="net.sourceforge.cobertura.datafile"
                          file="${basedir}/cobertura.ser"/>
+            <sysproperty key="log4j.debug" value="true"/>
+            <sysproperty key="log4j.configuration" value="file:///${config}/log4j.properties"/>
             <classpath refid="test.classpath"/>
 
             <batchtest haltonfailure="no" haltonerror="no" todir="${test-results}"
