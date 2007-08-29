@@ -111,7 +111,7 @@ public final class TestQTClusterer extends TestCase {
         assertEquals(10d, distanceCalculator.distance(2, 3));
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
-        assertEquals("Expected one cluster", 1, clusters.size());
+        assertEquals("Incorrect number of clusters", 1, clusters.size());
         assertEquals("First cluster must have size 2", 4, clusters.get(0).length);
         assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
         assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
@@ -141,7 +141,7 @@ public final class TestQTClusterer extends TestCase {
         assertEquals(11d, distanceCalculator.distance(2, 3));
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
-        assertEquals("Expected only two clusters", 3, clusters.size());
+        assertEquals("Incorrect number of clusters", 3, clusters.size());
         assertEquals("First cluster must have size 2", 2, clusters.get(0).length);
         assertEquals("Second cluster must have size 1", 1, clusters.get(1).length);
         assertEquals("Third cluster must have size 1", 1, clusters.get(2).length);
@@ -169,7 +169,7 @@ public final class TestQTClusterer extends TestCase {
 
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
-        assertEquals("Expected four clusters", 3, clusters.size());
+        assertEquals("Incorrect number of clusters", 3, clusters.size());
         assertEquals("First cluster must have size 2", 2, clusters.get(0).length);
         assertEquals("Second cluster must have size 1", 1, clusters.get(1).length);
         assertEquals("Third cluster must have size 1", 1, clusters.get(2).length);
