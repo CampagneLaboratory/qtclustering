@@ -39,8 +39,8 @@ import java.util.List;
  * {@link SimilarityDistanceCalculator}).
  *
  * @author Fabien Campagne
- * Date: Oct 2, 2005
- * Time: 6:23:51 PM
+ *         Date: Oct 2, 2005
+ *         Time: 6:23:51 PM
  */
 public final class QTClusterer {
     /**
@@ -58,6 +58,7 @@ public final class QTClusterer {
 
     /**
      * The time interval for a new log in milliseconds.
+     *
      * @see ProgressLogger#DEFAULT_LOG_INTERVAL
      */
     private long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
@@ -111,8 +112,9 @@ public final class QTClusterer {
     /**
      * Groups instances into clusters. Returns the indices of the instances
      * that belong to a cluster as an int array in the list result.
-     * @param calculator The distance calculator to
-     * @param qualityThreshold  The QT clustering algorithm quality threshold.
+     *
+     * @param calculator       The distance calculator to
+     * @param qualityThreshold The QT clustering algorithm quality threshold.
      * @return The list of clusters.
      */
     public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
@@ -137,14 +139,14 @@ public final class QTClusterer {
     /**
      * Performs the actual clustering.
      *
-     * @param result A list that should be used to store the results.
-     * @param calculator The {@link SimilarityDistanceCalculator} that
-     * should be used when clustering
+     * @param result           A list that should be used to store the results.
+     * @param calculator       The {@link SimilarityDistanceCalculator} that
+     *                         should be used when clustering
      * @param qualityThreshold
      * @param ignoreList
      * @param instances
-     * @param progressLogger A {@link ProgressLogger} that should used to
-     * update clustering progress.
+     * @param progressLogger   A {@link ProgressLogger} that should used to
+     *                         update clustering progress.
      */
     private void cluster(final List<int[]> result,
                          final SimilarityDistanceCalculator calculator,
@@ -175,7 +177,6 @@ public final class QTClusterer {
         final ProgressLogger loopProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "iterations");
         loopProgressLogger.displayFreeMemory = true;
-        loopProgressLogger.start();
 
         for (int i = 0; i < instanceCount; ++i) { // i : cluster index
             // ignore instance i if part of previously selected clusters.
@@ -186,6 +187,8 @@ public final class QTClusterer {
                 while (!done && instancesLeft > 1) {
                     double distance_i_j = Double.MAX_VALUE;
                     int minDistanceInstanceIndex = -1;
+                    loopProgressLogger.expectedUpdates = instanceCount;
+                    loopProgressLogger.start();
 
                     // find instance j such that distance i,j minimum
                     for (int j = 0; j < instanceCount; ++j) {
@@ -221,6 +224,10 @@ public final class QTClusterer {
                             if (!added
                                     && jVisited.get(minDistanceInstanceIndex)) {
                                 done = true;
+                                LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex, i, distance_i_j));
+
+                            } else {
+                                loopProgressLogger.expectedUpdates = instanceCount;
                             }
                         }
                     }
@@ -283,7 +290,7 @@ public final class QTClusterer {
      * Returns the list of clusters produced by clustering.
      *
      * @return A list of integer arrays, where each array represents a cluster
-     * and contains the index of the instance that belongs to a given cluster.
+     *         and contains the index of the instance that belongs to a given cluster.
      */
     public List<int[]> getClusters() {
         final List<int[]> result = new ArrayList<int[]>();
@@ -299,6 +306,7 @@ public final class QTClusterer {
 
     /**
      * Get the the progress logging interval.
+     *
      * @return the logging interval in milliseconds.
      */
     public long getLogInterval() {
@@ -307,6 +315,7 @@ public final class QTClusterer {
 
     /**
      * Set the the progress logging interval.
+     *
      * @param interval the logging interval in milliseconds.
      */
     public void setLogInterval(final long interval) {
