@@ -42,7 +42,7 @@ public abstract class MaxLinkageDistanceCalculator
      */
     public final double distance(final int[] cluster, final int clusterSize,
                                  final int instanceIndex) {
-        double maxDistance = 0;
+        double maxDistance = Double.MIN_VALUE;
 
         for (int i = 0; i < clusterSize; ++i) {
             final int anInstance = cluster[i];
