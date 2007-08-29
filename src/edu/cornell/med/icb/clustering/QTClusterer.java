@@ -18,12 +18,10 @@
 
 package edu.cornell.med.icb.clustering;
 
-import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,25 +40,11 @@ import java.util.List;
  *         Date: Oct 2, 2005
  *         Time: 6:23:51 PM
  */
-public final class QTClusterer extends AbstractClusterer {
+public final class QTClusterer extends AbstractQTClusterer {
     /**
      * Used to log debug and informational messages.
      */
     private static final Logger LOGGER = Logger.getLogger(QTClusterer.class);
-
-    private final int clusterCount;
-    private final int[][] clusters;
-    private final int[] clusterSizes;
-    private final int instanceCount;
-
-    private final Int2BooleanMap jVisited;
-
-    /**
-     * The time interval for a new log in milliseconds.
-     *
-     * @see ProgressLogger#DEFAULT_LOG_INTERVAL
-     */
-    private long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
 
     /**
      * Construct a new quality threshold clusterer.
@@ -68,59 +52,7 @@ public final class QTClusterer extends AbstractClusterer {
      * @param numberOfInstances The number of instances to cluster.
      */
     public QTClusterer(final int numberOfInstances) {
-        super();
-        clusterCount = numberOfInstances;
-        // Data elements are available only if k<clusterSizes[l]
-        clusters = new int[clusterCount][numberOfInstances];
-        // number of instances in each cluster.
-        clusterSizes = new int[clusterCount];
-        this.instanceCount = numberOfInstances;
-
-        resetTmpClusters();
-        jVisited = new Int2BooleanAVLTreeMap();
-
-        clustersCannotOverlap = true;
-    }
-
-    /**
-     * Initialize instance index in clusters to value that is not supported.
-     */
-    private void resetTmpClusters() {
-        for (final int[] cluster : clusters) {
-            for (int i = 0; i < cluster.length; ++i) {
-                cluster[i] = Integer.MAX_VALUE;
-            }
-        }
-        for (int i = 0; i < clusterSizes.length; ++i) {
-            clusterSizes[i] = 0;
-        }
-    }
-
-    /**
-     * Groups instances into clusters. Returns the indices of the instances
-     * that belong to a cluster as an int array in the list result.
-     *
-     * @param calculator       The distance calculator to
-     * @param qualityThreshold The QT clustering algorithm quality threshold.
-     * @return The list of clusters.
-     */
-    public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
-                               final float qualityThreshold) {
-        final ProgressLogger clusterProgressLogger =
-                new ProgressLogger(LOGGER, logInterval, "instances clustered");
-        clusterProgressLogger.displayFreeMemory = true;
-        clusterProgressLogger.expectedUpdates = instanceCount;
-        clusterProgressLogger.start("Starting to cluster");
-
-        final List<int[]> result = new ArrayList<int[]>();
-        // set of instances to ignore.
-        // Map returns true if instance must be ignored.
-        final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
-
-        cluster(result, calculator, qualityThreshold, ignoreList,
-                instanceCount, clusterProgressLogger);
-        clusterProgressLogger.done();
-        return result;
+        super(numberOfInstances);
     }
 
     /**
@@ -135,12 +67,12 @@ public final class QTClusterer extends AbstractClusterer {
      * @param progressLogger   A {@link ProgressLogger} that should used to
      *                         update clustering progress.
      */
-    private void cluster(final List<int[]> result,
-                         final SimilarityDistanceCalculator calculator,
-                         final float qualityThreshold,
-                         final Int2BooleanMap ignoreList,
-                         final int instances,
-                         final ProgressLogger progressLogger) {
+    protected void cluster(final List<int[]> result,
+                           final SimilarityDistanceCalculator calculator,
+                           final float qualityThreshold,
+                           final Int2BooleanMap ignoreList,
+                           final int instances,
+                           final ProgressLogger progressLogger) {
         int instancesLeft = instances;
 
         resetTmpClusters();
@@ -245,66 +177,5 @@ public final class QTClusterer extends AbstractClusterer {
         // recurse.
         cluster(result, calculator, qualityThreshold, ignoreList,
                 instancesLeft, progressLogger);
-    }
-
-    /**
-     * Add an instance to a cluster.
-     *
-     * @param instanceIndex Index of the instance to add to the cluster.
-     * @param clusterIndex  Index of the cluster where to add the instance.
-     * @return true if instance appended to cluster, false otherwise
-     */
-    public boolean addToCluster(final int instanceIndex,
-                                final int clusterIndex) {
-        assert instanceIndex != Integer.MAX_VALUE : "instance Index =="
-                + Integer.MAX_VALUE + " is not supported";
-        // return immediately if instance already in cluster;
-        for (int i = 0; i < clusterSizes[clusterIndex]; ++i) {
-            if (clusters[clusterIndex][i] == instanceIndex) {
-                return false;
-            }
-        }
-        final int lastInstanceIndex = clusterSizes[clusterIndex];
-        assert clusterIndex < clusters.length;
-        assert lastInstanceIndex < clusters[clusterIndex].length;
-        clusters[clusterIndex][lastInstanceIndex] = instanceIndex;
-        clusterSizes[clusterIndex] += 1;
-        return true;
-    }
-
-    /**
-     * Returns the list of clusters produced by clustering.
-     *
-     * @return A list of integer arrays, where each array represents a cluster
-     *         and contains the index of the instance that belongs to a given cluster.
-     */
-    public List<int[]> getClusters() {
-        final List<int[]> result = new ArrayList<int[]>();
-        final int resultClusterCount = clusterCount;
-
-        for (int l = 0; l < resultClusterCount; ++l) {
-            final int[] trimmedCluster = new int[clusterSizes[l]]; // NOPMD
-            System.arraycopy(clusters[l], 0, trimmedCluster, 0, clusterSizes[l]);
-            result.add(trimmedCluster);
-        }
-        return result;
-    }
-
-    /**
-     * Get the the progress logging interval.
-     *
-     * @return the logging interval in milliseconds.
-     */
-    public long getLogInterval() {
-        return logInterval;
-    }
-
-    /**
-     * Set the the progress logging interval.
-     *
-     * @param interval the logging interval in milliseconds.
-     */
-    public void setLogInterval(final long interval) {
-        this.logInterval = interval;
     }
 }

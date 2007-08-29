@@ -9,6 +9,7 @@
       <maximumHeapSize value="128" />
       <properties />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestParallelQTClusterer" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="" />
     </buildFile>
     <buildFile url="file://$PROJECT_DIR$/release.xml">
