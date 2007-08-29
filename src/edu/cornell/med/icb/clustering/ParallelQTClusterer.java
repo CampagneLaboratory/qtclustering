@@ -25,10 +25,12 @@ import edu.rit.pj.ParallelTeam;
 import edu.rit.pj.reduction.SharedDouble;
 import edu.rit.pj.reduction.SharedInteger;
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
+import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Implements the QT Clustering algorithm. (QT stands for Quality
@@ -97,8 +99,52 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
     }
 
     /**
+     * Groups instances into clusters. Returns the indices of the instances
+     * that belong to a cluster as an int array in the list result.
+     *
+     * @param calculator       The distance calculator to
+     * @param qualityThreshold The QT clustering algorithm quality threshold.
+     * @return The list of clusters.
+     */
+    public final List<int[]> cluster(
+            final SimilarityDistanceCalculator calculator,
+            final float qualityThreshold) {
+        final ProgressLogger clusterProgressLogger =
+                new ProgressLogger(LOGGER, logInterval, "instances clustered");
+        clusterProgressLogger.displayFreeMemory = true;
+        clusterProgressLogger.expectedUpdates = instanceCount;
+        clusterProgressLogger.start("Starting to cluster");
+
+        final List<int[]> result = new ArrayList<int[]>();
+        // set of instances to ignore.
+        // Map returns true if instance must be ignored.
+        final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
+
+        // don't create more threads than there are instances
+        final int numberOfThreads =
+                Math.max(1, Math.min(threadCount, instanceCount));
+        LOGGER.debug("starting " + numberOfThreads + " threads");
+        final ParallelTeam team = new ParallelTeam(numberOfThreads);
+
+        try {
+            cluster(team, result, calculator, qualityThreshold, ignoreList,
+                    instanceCount, clusterProgressLogger);
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new ClusteringException(e);
+            }
+        }
+
+        clusterProgressLogger.done();
+        return result;
+    }
+
+    /**
      * Performs the actual clustering.
      *
+     * @param team The team of threads for executing clustering
      * @param result A list that should be used to store the results.
      * @param calculator The {@link SimilarityDistanceCalculator}
      * that should be used when clustering
@@ -108,7 +154,8 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
      * @param progressLogger A {@link ProgressLogger}
      * that should used to update clustering progress.
      */
-    protected void cluster(final List<int[]> result,
+    protected void cluster(final ParallelTeam team,
+                           final List<int[]> result,
                            final SimilarityDistanceCalculator calculator,
                            final float qualityThreshold,
                            final Int2BooleanMap ignoreList,
@@ -150,10 +197,7 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                     loopProgressLogger.start();
 
                     // find instance j such that distance i,j minimum
-                    // don't create more threads than there are instances
-                    final int numberOfThreads =
-                            Math.max(1, Math.min(threadCount, instanceCount));
-                    new ParallelTeam(numberOfThreads).execute(new ParallelRegion() {
+                    team.execute(new ParallelRegion() {
                         @Override
                         public void run() throws Exception {
                             execute(0, instanceCount - 1, new IntegerForLoop() {
@@ -202,7 +246,7 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                                     addToCluster(minDistanceInstanceIndex.get(), i);
                             if (!added && jVisited.get(minDistanceInstanceIndex.get())) {
                                 done = true;
-                                LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex, i, distance_i_j));
+                                LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex.get(), i, distance_i_j.get()));
 
                             } else {
                                 loopProgressLogger.expectedUpdates = instanceCount;
@@ -238,7 +282,7 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
         }
 
         // recurse.
-        cluster(result, calculator, qualityThreshold, ignoreList,
+        cluster(team, result, calculator, qualityThreshold, ignoreList,
                 instancesLeft, progressLogger);
     }
 }

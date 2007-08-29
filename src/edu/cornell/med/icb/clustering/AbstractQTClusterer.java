@@ -164,25 +164,6 @@ public abstract class AbstractQTClusterer implements Clusterer {
     }
 
     /**
-     * Performs the actual clustering.
-     *
-     * @param result           A list that should be used to store the results.
-     * @param calculator       The {@link SimilarityDistanceCalculator} that
-     *                         should be used when clustering
-     * @param qualityThreshold
-     * @param ignoreList
-     * @param instances
-     * @param progressLogger   A {@link ProgressLogger} that should used to
-     *                         update clustering progress.
-     */
-    protected abstract void cluster(List<int[]> result,
-                         SimilarityDistanceCalculator calculator,
-                         float qualityThreshold,
-                         Int2BooleanMap ignoreList,
-                         int instances,
-                         ProgressLogger progressLogger) throws Exception;
-
-    /**
      * Returns the list of clusters produced by clustering.
      *
      * @return A list of integer arrays, where each array represents a cluster
@@ -197,42 +178,6 @@ public abstract class AbstractQTClusterer implements Clusterer {
             System.arraycopy(clusters[l], 0, trimmedCluster, 0, clusterSizes[l]);
             result.add(trimmedCluster);
         }
-        return result;
-    }
-
-    /**
-     * Groups instances into clusters. Returns the indices of the instances
-     * that belong to a cluster as an int array in the list result.
-     *
-     * @param calculator       The distance calculator to
-     * @param qualityThreshold The QT clustering algorithm quality threshold.
-     * @return The list of clusters.
-     */
-    public final List<int[]> cluster(
-            final SimilarityDistanceCalculator calculator,
-            final float qualityThreshold) {
-        final ProgressLogger clusterProgressLogger =
-                new ProgressLogger(LOGGER, logInterval, "instances clustered");
-        clusterProgressLogger.displayFreeMemory = true;
-        clusterProgressLogger.expectedUpdates = instanceCount;
-        clusterProgressLogger.start("Starting to cluster");
-
-        final List<int[]> result = new ArrayList<int[]>();
-        // set of instances to ignore.
-        // Map returns true if instance must be ignored.
-        final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
-
-        try {
-            cluster(result, calculator, qualityThreshold, ignoreList,
-                    instanceCount, clusterProgressLogger);
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else {
-                throw new RuntimeException(e);
-            }
-        }
-        clusterProgressLogger.done();
         return result;
     }
 }

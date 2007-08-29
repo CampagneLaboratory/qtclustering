@@ -19,10 +19,12 @@
 package edu.cornell.med.icb.clustering;
 
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
+import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Implements the QT Clustering algorithm. (QT stands for Quality
@@ -56,6 +58,35 @@ public final class QTClusterer extends AbstractQTClusterer {
     }
 
     /**
+     * Groups instances into clusters. Returns the indices of the instances
+     * that belong to a cluster as an int array in the list result.
+     *
+     * @param calculator       The distance calculator to
+     * @param qualityThreshold The QT clustering algorithm quality threshold.
+     * @return The list of clusters.
+     */
+    public final List<int[]> cluster(
+            final SimilarityDistanceCalculator calculator,
+            final float qualityThreshold) {
+        final ProgressLogger clusterProgressLogger =
+                new ProgressLogger(LOGGER, logInterval, "instances clustered");
+        clusterProgressLogger.displayFreeMemory = true;
+        clusterProgressLogger.expectedUpdates = instanceCount;
+        clusterProgressLogger.start("Starting to cluster");
+
+        final List<int[]> result = new ArrayList<int[]>();
+        // set of instances to ignore.
+        // Map returns true if instance must be ignored.
+        final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
+
+        cluster(result, calculator, qualityThreshold, ignoreList,
+                instanceCount, clusterProgressLogger);
+
+        clusterProgressLogger.done();
+        return result;
+    }
+    
+    /**
      * Performs the actual clustering.
      *
      * @param result A list that should be used to store the results.
@@ -67,7 +98,7 @@ public final class QTClusterer extends AbstractQTClusterer {
      * @param progressLogger A {@link ProgressLogger}
      * that should used to update clustering progress.
      */
-    protected void cluster(final List<int[]> result,
+    private void cluster(final List<int[]> result,
                            final SimilarityDistanceCalculator calculator,
                            final float qualityThreshold,
                            final Int2BooleanMap ignoreList,
@@ -95,8 +126,7 @@ public final class QTClusterer extends AbstractQTClusterer {
                 new ProgressLogger(LOGGER, logInterval, "iterations");
         loopProgressLogger.displayFreeMemory = true;
 
-        for (int clusterIndex = 0; clusterIndex < instanceCount; ++clusterIndex) { // i : cluster index
-            final int i = clusterIndex;
+        for (int i = 0; i < instanceCount; ++i) { // i : cluster index
             // ignore instance i if part of previously selected clusters.
             if (!clustersCannotOverlap || !ignoreList.get(i)) {
                 boolean done = false;

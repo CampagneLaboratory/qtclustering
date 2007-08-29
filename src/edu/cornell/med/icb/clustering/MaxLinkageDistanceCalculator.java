@@ -31,7 +31,7 @@ public abstract class MaxLinkageDistanceCalculator
         implements SimilarityDistanceCalculator {
     /**
      * Returns the distance between an instance and the instances in a cluster.
-     * The default implementation calculates maximum linkeage (max of the
+     * The default implementation calculates maximum linkage (max of the
      * distances between instances in the cluster and instanceIndex).
      * @param cluster Cluster array
      * @param clusterSize Number of the cluster array that contain instances.
