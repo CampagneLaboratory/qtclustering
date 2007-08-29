@@ -120,7 +120,7 @@ public final class QTClusterer {
     public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
                                final float qualityThreshold) {
         final ProgressLogger clusterProgressLogger =
-                new ProgressLogger(LOGGER, logInterval, "clusters");
+                new ProgressLogger(LOGGER, logInterval, "instances clustered");
         clusterProgressLogger.displayFreeMemory = true;
         clusterProgressLogger.expectedUpdates = instanceCount;
         clusterProgressLogger.start("Starting to cluster");
