@@ -42,7 +42,7 @@ import java.util.List;
  *         Date: Oct 2, 2005
  *         Time: 6:23:51 PM
  */
-public final class QTClusterer {
+public final class QTClusterer extends AbstractClusterer {
     /**
      * Used to log debug and informational messages.
      */
@@ -52,7 +52,6 @@ public final class QTClusterer {
     private final int[][] clusters;
     private final int[] clusterSizes;
     private final int instanceCount;
-    private boolean clustersCannotOverlap;
 
     private final Int2BooleanMap jVisited;
 
@@ -80,7 +79,7 @@ public final class QTClusterer {
         resetTmpClusters();
         jVisited = new Int2BooleanAVLTreeMap();
 
-        setClustersCannotOverlap(true);
+        clustersCannotOverlap = true;
     }
 
     /**
@@ -95,18 +94,6 @@ public final class QTClusterer {
         for (int i = 0; i < clusterSizes.length; ++i) {
             clusterSizes[i] = 0;
         }
-    }
-
-    /**
-     * Indicate that clusters cannot overlap. If clustersCannotOverlap is true,
-     * then clustering will produce clusters that do not overlap. If
-     * clustersCannotOverlap is false, overlapping is allowed, and some
-     * instances will be part of several clusters.
-     *
-     * @param cannotOverlap Indicates whether or not clusters can overlap
-     */
-    public void setClustersCannotOverlap(final boolean cannotOverlap) {
-        this.clustersCannotOverlap = cannotOverlap;
     }
 
     /**
@@ -221,8 +208,7 @@ public final class QTClusterer {
                         } else {
                             final boolean added =
                                     addToCluster(minDistanceInstanceIndex, i);
-                            if (!added
-                                    && jVisited.get(minDistanceInstanceIndex)) {
+                            if (!added && jVisited.get(minDistanceInstanceIndex)) {
                                 done = true;
                                 LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex, i, distance_i_j));
 
