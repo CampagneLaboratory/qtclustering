@@ -20,17 +20,16 @@ package edu.cornell.med.icb.clustering;
 
 import edu.rit.pj.IntegerForLoop;
 import edu.rit.pj.ParallelRegion;
-import edu.rit.pj.ParallelSection;
 import edu.rit.pj.ParallelTeam;
-import edu.rit.pj.reduction.SharedDouble;
-import edu.rit.pj.reduction.SharedInteger;
-import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
+import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
+import org.apache.commons.lang.mutable.MutableDouble;
+import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.log4j.Logger;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implements the QT Clustering algorithm. (QT stands for Quality
@@ -58,6 +57,16 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
     private int threadCount;
 
     /**
+     * distance_i_j calculated per thread.
+     */
+    private final double[] distances;
+
+    /**
+     * minindex calculated per thread.
+     */
+    private final int[] indices;
+
+    /**
      * Construct a new quality threshold clusterer.
      *
      * @param numberOfInstances The number of instances to cluster.
@@ -75,7 +84,14 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
     public ParallelQTClusterer(final int numberOfInstances,
                                final int numberOfThreads) {
         super(numberOfInstances);
-        setThreadCount(numberOfThreads);
+
+        if (numberOfThreads < 1) {
+            throw new IllegalArgumentException("Thread count must be > 0");
+        }
+        threadCount = numberOfThreads;
+
+        distances = new double[threadCount];
+        indices = new int[threadCount];
     }
 
     /**
@@ -84,18 +100,6 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
      */
     public int getThreadCount() {
         return threadCount;
-    }
-
-    /**
-     * Specify the number of threads to use when clustering.
-     * @param numberOfThreads Number of threads to use when clustering.
-     * @throws IllegalArgumentException if the thread count is less than 1
-     */
-    public void setThreadCount(final int numberOfThreads) {
-        if (numberOfThreads < 1) {
-            throw new IllegalArgumentException("Thread count must be > 0");
-        }
-        threadCount = numberOfThreads;
     }
 
     /**
@@ -120,11 +124,8 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
         // Map returns true if instance must be ignored.
         final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
 
-        // don't create more threads than there are instances
-        final int numberOfThreads =
-                Math.max(1, Math.min(threadCount, instanceCount));
-        LOGGER.debug("starting " + numberOfThreads + " threads");
-        final ParallelTeam team = new ParallelTeam(numberOfThreads);
+        LOGGER.debug("starting " + threadCount + " threads");
+        final ParallelTeam team = new ParallelTeam(threadCount);
 
         try {
             cluster(team, result, calculator, qualityThreshold, ignoreList,
@@ -154,13 +155,13 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
      * @param progressLogger A {@link ProgressLogger}
      * that should used to update clustering progress.
      */
-    protected void cluster(final ParallelTeam team,
-                           final List<int[]> result,
-                           final SimilarityDistanceCalculator calculator,
-                           final float qualityThreshold,
-                           final Int2BooleanMap ignoreList,
-                           final int instances,
-                           final ProgressLogger progressLogger) throws Exception {
+    private void cluster(final ParallelTeam team,
+                         final List<int[]> result,
+                         final SimilarityDistanceCalculator calculator,
+                         final float qualityThreshold,
+                         final Int2BooleanMap ignoreList,
+                         final int instances,
+                         final ProgressLogger progressLogger) throws Exception {
         resetTmpClusters();
         if (instances <= 1) { // one instance -> one cluster
             if (instances > 0) {
@@ -183,6 +184,9 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                 new ProgressLogger(LOGGER, logInterval, "iterations");
         loopProgressLogger.displayFreeMemory = true;
 
+        final MutableDouble distance_i_j = new MutableDouble();
+        final MutableInt minDistanceInstanceIndex = new MutableInt();
+
         for (int clusterIndex = 0; clusterIndex < instanceCount; ++clusterIndex) { // i : cluster index
             final int i = clusterIndex;
             // ignore instance i if part of previously selected clusters.
@@ -191,10 +195,11 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                 addToCluster(i, i);
                 jVisited.clear();
                 while (!done && instances > 1) {
-                    final SharedDouble distance_i_j = new SharedDouble(Double.MAX_VALUE);
-                    final SharedInteger minDistanceInstanceIndex = new SharedInteger(-1);
                     loopProgressLogger.expectedUpdates = instanceCount;
                     loopProgressLogger.start();
+
+                    distance_i_j.setValue(Double.MAX_VALUE);
+                    minDistanceInstanceIndex.setValue(-1);
 
                     // find instance j such that distance i,j minimum
                     team.execute(new ParallelRegion() {
@@ -203,6 +208,9 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                             execute(0, instanceCount - 1, new IntegerForLoop() {
                                 @Override
                                 public void run(final int first, final int last) throws Exception {
+                                    double dij = Double.MAX_VALUE;
+                                    int minIndex = -1;
+
                                     for (int j = first; j <= last; ++j) {
                                         if (!ignoreList.get(j)) {
                                             if (i != j) {
@@ -210,43 +218,55 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                                                     final double newDistance =
                                                             calculator.distance(clusters[i],
                                                                     clusterSizes[i], j);
-                                                    final int instance = j;
-                                                    critical(new ParallelSection() {
-                                                        @Override
-                                                        public void run() throws Exception {
-                                                            if (newDistance < distance_i_j.get()) {
-                                                                distance_i_j.set(newDistance);
-                                                                minDistanceInstanceIndex.set(instance);
-                                                                jVisited.put(instance, true);
-                                                            }
-                                                        }
-                                                    });
-
+                                                    if (newDistance < dij) {
+                                                        dij = newDistance;
+                                                        minIndex = j;
+                                                    }
                                                 }
                                             }
                                         }
                                         loopProgressLogger.update();
+
                                     }
+
+                                    final int k = getThreadIndex();
+                                    distances[k] = dij;
+                                    indices[k] = minIndex;
                                 }
                             });
+                        }
+
+                        @Override
+                        public void finish() {
+                            // find the minimum out of all the threads
+                            for (int k = 0; k < threadCount; k++) {
+                                final double distance = distances[k];
+                                if (distance < distance_i_j.doubleValue()) {
+                                    distance_i_j.setValue(distance);
+
+                                    final int index = indices[k];
+                                    minDistanceInstanceIndex.setValue(index);
+                                    jVisited.put(index, true);
+                                }
+                            }
                         }
                     });
 
 
                     // grow clusters until min distance between new instance
                     // and cluster reaches quality threshold:
-                    if (distance_i_j.get() > qualityThreshold) {
+                    if (distance_i_j.doubleValue() > qualityThreshold) {
                         done = true;
                     } else {
                         if (clustersCannotOverlap
-                                && ignoreList.get(minDistanceInstanceIndex.get())) {
+                                && ignoreList.get(minDistanceInstanceIndex.intValue())) {
                             done = true;
                         } else {
                             final boolean added =
-                                    addToCluster(minDistanceInstanceIndex.get(), i);
-                            if (!added && jVisited.get(minDistanceInstanceIndex.get())) {
+                                    addToCluster(minDistanceInstanceIndex.intValue(), i);
+                            if (!added && jVisited.get(minDistanceInstanceIndex.intValue())) {
                                 done = true;
-                                LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex.get(), i, distance_i_j.get()));
+                                LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex.intValue(), i, distance_i_j.doubleValue()));
 
                             } else {
                                 loopProgressLogger.expectedUpdates = instanceCount;

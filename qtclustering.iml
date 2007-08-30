@@ -74,7 +74,10 @@
           <root url="jar://$MODULE_DIR$/lib/commons-lang-2.3.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../../java/commons-lang-2.3-src.zip!/commons-lang-2.3-src/src/java" />
+          <root url="jar://$MODULE_DIR$/../../../../../java/commons-lang-2.3-src.zip!/commons-lang-2.3-src/src/test" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntryProperties />

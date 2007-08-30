@@ -85,7 +85,7 @@ public final class QTClusterer extends AbstractQTClusterer {
         clusterProgressLogger.done();
         return result;
     }
-    
+
     /**
      * Performs the actual clustering.
      *
@@ -99,11 +99,11 @@ public final class QTClusterer extends AbstractQTClusterer {
      * that should used to update clustering progress.
      */
     private void cluster(final List<int[]> result,
-                           final SimilarityDistanceCalculator calculator,
-                           final float qualityThreshold,
-                           final Int2BooleanMap ignoreList,
-                           final int instances,
-                           final ProgressLogger progressLogger) {
+                         final SimilarityDistanceCalculator calculator,
+                         final float qualityThreshold,
+                         final Int2BooleanMap ignoreList,
+                         final int instances,
+                         final ProgressLogger progressLogger) {
         resetTmpClusters();
         if (instances <= 1) { // one instance -> one cluster
             if (instances > 0) {

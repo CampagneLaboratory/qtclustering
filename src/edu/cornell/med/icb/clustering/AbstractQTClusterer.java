@@ -18,25 +18,17 @@
 
 package edu.cornell.med.icb.clustering;
 
-import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
+import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 
-import java.util.List;
 import java.util.ArrayList;
-
-import org.apache.log4j.Logger;
+import java.util.List;
 
 /**
  * Base class for clustering implementationsx.
  */
 public abstract class AbstractQTClusterer implements Clusterer {
-    /**
-     * Used to log debug and informational messages.
-     */
-    private static final Logger LOGGER =
-            Logger.getLogger(AbstractQTClusterer.class);
-
     /**
      * Indicate that clusters cannot overlap.
      */
