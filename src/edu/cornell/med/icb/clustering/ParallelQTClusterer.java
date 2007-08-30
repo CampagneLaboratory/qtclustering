@@ -117,14 +117,14 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                 new ProgressLogger(LOGGER, logInterval, "instances clustered");
         clusterProgressLogger.displayFreeMemory = true;
         clusterProgressLogger.expectedUpdates = instanceCount;
-        clusterProgressLogger.start("Starting to cluster");
+        clusterProgressLogger.start("Starting to cluster with "
+                + threadCount + " threads");
 
         final List<int[]> result = new ArrayList<int[]>();
         // set of instances to ignore.
         // Map returns true if instance must be ignored.
         final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
 
-        LOGGER.debug("starting " + threadCount + " threads");
         final ParallelTeam team = new ParallelTeam(threadCount);
 
         try {
