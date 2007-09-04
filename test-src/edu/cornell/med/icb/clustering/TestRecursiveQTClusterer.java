@@ -18,10 +18,9 @@
 
 package edu.cornell.med.icb.clustering;
 
-import junit.framework.TestCase;
-import org.apache.commons.lang.ArrayUtils;
-
 import java.util.List;
+
+import junit.framework.TestCase;
 
 /**
  * User: Fabien Campagne
@@ -29,40 +28,10 @@ import java.util.List;
  * Time: 6:59:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public final class TestParallelQTClusterer extends TestCase {
-    /**
-     * Check that data structures used to store clusters work as they should.
-     */
-    public void testDataStorage() {
-        // put one instance in each cluster, total two instances
-        ParallelQTClusterer clusterer = new ParallelQTClusterer(2);
-        clusterer.addToCluster(0, 0);
-        clusterer.addToCluster(1, 1);
-        List<int []> clusters = clusterer.getClusters();
-        assertNotNull(clusters.get(0));
-        assertNotNull(clusters.get(1));
-        assertEquals(1, clusters.get(0).length);
-        assertEquals(1, clusters.get(1).length);
-        assertEquals(0, clusters.get(0)[0]);
-        assertEquals(1, clusters.get(1)[0]);
-
-        // put two instances in the first cluster, none in the second, total two
-        // instances
-        clusterer = new ParallelQTClusterer(2);
-        clusterer.addToCluster(0, 0);
-        clusterer.addToCluster(1, 0);
-        clusters = clusterer.getClusters();
-        assertNotNull(clusters.get(0));
-        assertNotNull(clusters.get(1));
-        assertEquals(clusters.get(0).length, 2);
-        assertEquals(clusters.get(1).length, 0);
-        assertEquals(0, clusters.get(0)[0]);
-        assertEquals(1, clusters.get(0)[1]);
-    }
-
+public final class TestRecursiveQTClusterer extends TestCase {
     public void testOneInstancePerCluster() {
         // put one instance in each cluster, total two instances
-        final ParallelQTClusterer clusterer = new ParallelQTClusterer(2);
+        final RecursiveQTClusterer clusterer = new RecursiveQTClusterer(2);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
             @Override
             public double distance(final int instanceIndex, final int otherInstanceIndex) {
@@ -91,7 +60,7 @@ public final class TestParallelQTClusterer extends TestCase {
 
     public void testFourInstanceClusteringInOneCluster() {
         // put one instance in each cluster, total two instances
-        final ParallelQTClusterer clusterer = new ParallelQTClusterer(4);
+        final RecursiveQTClusterer clusterer = new RecursiveQTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
             @Override
             public double distance(final int instanceIndex, final int otherInstanceIndex) {
@@ -110,23 +79,19 @@ public final class TestParallelQTClusterer extends TestCase {
         assertEquals(10d, distanceCalculator.distance(0, 2));
         assertEquals(10d, distanceCalculator.distance(2, 0));
         assertEquals(10d, distanceCalculator.distance(2, 3));
-
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
         assertEquals("Incorrect number of clusters", 1, clusters.size());
         assertEquals("First cluster must have size 2", 4, clusters.get(0).length);
-
-        // the parallel clusterer is non-deterministic
-        final int[] cluster0 = clusters.get(0);
-        for (int i = 0; i < 4; i++) {
-            assertTrue("Instance " + i + " in cluster 0",
-                    ArrayUtils.contains(cluster0, i));
-        }
+        assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
+        assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
+        assertEquals("Instance 2 in cluster 0", 2, clusters.get(0)[2]);
+        assertEquals("Instance 3 in cluster 0", 3, clusters.get(0)[3]);
     }
 
     public void testFourInstanceClusteringInThreeClusters() {
         // put one instance in each cluster, total two instances
-        final ParallelQTClusterer clusterer = new ParallelQTClusterer(4);
+        final RecursiveQTClusterer clusterer = new RecursiveQTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
 
             @Override
@@ -150,21 +115,15 @@ public final class TestParallelQTClusterer extends TestCase {
         assertEquals("First cluster must have size 2", 2, clusters.get(0).length);
         assertEquals("Second cluster must have size 1", 1, clusters.get(1).length);
         assertEquals("Third cluster must have size 1", 1, clusters.get(2).length);
-
-        // the parallel clusterer is non-deterministic
-        final int[] cluster0 = clusters.get(0);
-        for (int i = 0; i < 2; i++) {
-            assertTrue("Instance " + i + " in cluster 0",
-                    ArrayUtils.contains(cluster0, i));
-        }
-
+        assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
+        assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
         assertEquals("Instance 2 in cluster 1", 2, clusters.get(1)[0]);
         assertEquals("Instance 3 in cluster 2", 3, clusters.get(2)[0]);
     }
 
     public void testFourInstanceClusteringInFourClusters() {
         // put one instance in each cluster, total two instances
-        final ParallelQTClusterer clusterer = new ParallelQTClusterer(4);
+        final RecursiveQTClusterer clusterer = new RecursiveQTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
 
             @Override
@@ -184,20 +143,14 @@ public final class TestParallelQTClusterer extends TestCase {
         assertEquals("First cluster must have size 2", 2, clusters.get(0).length);
         assertEquals("Second cluster must have size 1", 1, clusters.get(1).length);
         assertEquals("Third cluster must have size 1", 1, clusters.get(2).length);
-
-        // the parallel clusterer is non-deterministic
-        final int[] cluster0 = clusters.get(0);
-        for (int i = 0; i < 2; i++) {
-            assertTrue("Instance " + i + " in cluster 0",
-                    ArrayUtils.contains(cluster0, i));
-        }
-
+        assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
+        assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
         assertEquals("Instance 2 in cluster 2", 2, clusters.get(1)[0]);
         assertEquals("Instance 3 in cluster 3", 3, clusters.get(2)[0]);
     }
 
     public void testOther() {
-        final ParallelQTClusterer clusterer = new ParallelQTClusterer(4);
+        final RecursiveQTClusterer clusterer = new RecursiveQTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
 
             @Override
@@ -205,16 +158,15 @@ public final class TestParallelQTClusterer extends TestCase {
                 return 0;    // instances 0-3 belong to the same cluster
             }
         };
+
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
-        assertEquals("Incorrect number of clusters", 1, clusters.size());
+        assertEquals("Expected one cluster", 1, clusters.size());
         assertEquals("First cluster must have size 4", 4, clusters.get(0).length);
 
-        // the parallel clusterer is non-deterministic
-        final int[] cluster0 = clusters.get(0);
-        for (int i = 0; i < 4; i++) {
-            assertTrue("Instance " + i + " in cluster 0",
-                    ArrayUtils.contains(cluster0, i));
-        }
+        assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
+        assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
+        assertEquals("Instance 2 in cluster 0", 2, clusters.get(0)[2]);
+        assertEquals("Instance 3 in cluster 0", 3, clusters.get(0)[3]);
     }
 }

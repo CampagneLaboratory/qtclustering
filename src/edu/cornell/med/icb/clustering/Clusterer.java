@@ -33,15 +33,6 @@ public interface Clusterer {
                         final float qualityThreshold);
 
     /**
-     * Add an instance to a cluster.
-     *
-     * @param instanceIndex Index of the instance to add to the cluster.
-     * @param clusterIndex  Index of the cluster where to add the instance.
-     * @return true if instance appended to cluster, false otherwise
-     */
-    boolean addToCluster(final int instanceIndex, final int clusterIndex);
-
-    /**
      * Returns the list of clusters produced by clustering.
      *
      * @return A list of integer arrays, where each array represents a cluster

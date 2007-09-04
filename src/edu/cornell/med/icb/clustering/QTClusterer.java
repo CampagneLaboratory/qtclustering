@@ -18,51 +18,118 @@
 
 package edu.cornell.med.icb.clustering;
 
-import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
-import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 import org.apache.log4j.Logger;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Implements the QT Clustering algorithm. (QT stands for Quality
  * Threshold/diameter of the cluster)
  * See  http://en.wikipedia.org/wiki/Data_clustering#Types_of_clustering
  * and http://www.genome.org/cgi/content/full/9/11/1106 Heyer LJ et al 1999.
- * This implementation should be fairly efficient. Memory needed by the
- * algorithm is allocated only at the beginning of the clustering process
- * (not as clustering proceeds). The implementation makes it easy to plugin
- * a new distance similarity measure or a new linkage method
  * (just implement the interface
  * {@link SimilarityDistanceCalculator}).
  *
- * @author Fabien Campagne
- *         Date: Oct 2, 2005
- *         Time: 6:23:51 PM
  */
-public final class QTClusterer extends AbstractQTClusterer {
+public final class QTClusterer implements Clusterer {
     /**
      * Used to log debug and informational messages.
      */
     private static final Logger LOGGER = Logger.getLogger(QTClusterer.class);
 
     /**
+     * Indicate that clusters cannot overlap.
+     */
+    private boolean clustersCannotOverlap = true;
+
+    /**
+     * The time interval for a new log in milliseconds.
+     *
+     * @see ProgressLogger#DEFAULT_LOG_INTERVAL
+     */
+    private long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
+
+    /**
+     * The total number of instances to cluster.
+     */
+    private final int instanceCount;
+
+    /**
+     * The total number of clusters created by clustering the instances.
+     */
+    private int clusterCount;
+
+    /**
+     * The list of clusters.
+     */
+    private final IntArrayList[] clusters;
+
+    /**
      * Construct a new quality threshold clusterer.
      *
      * @param numberOfInstances The number of instances to cluster.
+     * i.e., |G| where G is the set of instances
      */
     public QTClusterer(final int numberOfInstances) {
-        super(numberOfInstances);
+        super();
+        instanceCount = numberOfInstances;
+        clusters = new IntArrayList[instanceCount];
+        for (int i = 0; i < instanceCount; i++) {
+            clusters[i] = new IntArrayList();
+        }
+    }
+
+    /**
+     * Get the the progress logging interval.
+     *
+     * @return the logging interval in milliseconds.
+     */
+    public final long getLogInterval() {
+        return logInterval;
+    }
+
+    /**
+     * Set the the progress logging interval.
+     *
+     * @param interval the logging interval in milliseconds.
+     */
+    public final void setLogInterval(final long interval) {
+        this.logInterval = interval;
+    }
+
+    /**
+     * If clustersCannotOverlap is true, then clustering will produce clusters
+     * that do not overlap. If clustersCannotOverlap is false, overlapping is
+     * allowed, and some instances will be part of several clusters.
+     *
+     * @return whether or not clusters can overlap
+     */
+    public final boolean isClustersCannotOverlap() {
+        return clustersCannotOverlap;
+    }
+
+    /**
+     * Indicate that clusters cannot overlap. If clustersCannotOverlap is true,
+     * then clustering will produce clusters that do not overlap. If
+     * clustersCannotOverlap is false, overlapping is allowed, and some
+     * instances will be part of several clusters.
+     *
+     * @param cannotOverlap Indicates whether or not clusters can overlap
+     */
+    public final void setClustersCannotOverlap(final boolean cannotOverlap) {
+        throw new UnsupportedOperationException("Not supported");
     }
 
     /**
      * Groups instances into clusters. Returns the indices of the instances
      * that belong to a cluster as an int array in the list result.
      *
-     * @param calculator       The distance calculator to
-     * @param qualityThreshold The QT clustering algorithm quality threshold.
+     * @param calculator The distance calculator to
+     * @param qualityThreshold The QT clustering algorithm quality threshold (d)
      * @return The list of clusters.
      */
     public final List<int[]> cluster(
@@ -72,142 +139,117 @@ public final class QTClusterer extends AbstractQTClusterer {
                 new ProgressLogger(LOGGER, logInterval, "instances clustered");
         clusterProgressLogger.displayFreeMemory = true;
         clusterProgressLogger.expectedUpdates = instanceCount;
-        clusterProgressLogger.start("Starting to cluster");
+        clusterProgressLogger.start("Starting to cluster "
+                + instanceCount + " instances");
 
-        final List<int[]> result = new ArrayList<int[]>();
-        // set of instances to ignore.
-        // Map returns true if instance must be ignored.
-        final Int2BooleanAVLTreeMap ignoreList = new Int2BooleanAVLTreeMap();
+        // reset cluster resultstars
+        clusterCount = 0;
+        final LinkedList<Integer> instanceList = new LinkedList<Integer>();
+        for (int i = 0; i < instanceCount; i++) {
+            clusters[i].clear();
 
-        cluster(result, calculator, qualityThreshold, ignoreList,
-                instanceCount, clusterProgressLogger);
-
-        clusterProgressLogger.done();
-        return result;
-    }
-
-    /**
-     * Performs the actual clustering.
-     *
-     * @param result A list that should be used to store the results.
-     * @param calculator The {@link SimilarityDistanceCalculator}
-     * that should be used when clustering
-     * @param qualityThreshold
-     * @param ignoreList
-     * @param instances
-     * @param progressLogger A {@link ProgressLogger}
-     * that should used to update clustering progress.
-     */
-    private void cluster(final List<int[]> result,
-                         final SimilarityDistanceCalculator calculator,
-                         final float qualityThreshold,
-                         final Int2BooleanMap ignoreList,
-                         final int instances,
-                         final ProgressLogger progressLogger) {
-        resetTmpClusters();
-        if (instances <= 1) { // one instance -> one cluster
-            if (instances > 0) {
-                final int[] singletonCluster = new int[instances];
-
-                // find the remaining instance:
-                for (int i = 0; i < instanceCount; ++i) {
-                    if (!ignoreList.get(i)) {
-                        singletonCluster[0] = i;
-                    }
-                }
-
-                result.add(singletonCluster);
-                progressLogger.update();
-            }
-            return;
+            // set each node in the instance list to it's
+            // original position in the source data array
+            instanceList.add(i);
         }
 
-        final ProgressLogger loopProgressLogger =
-                new ProgressLogger(LOGGER, logInterval, "iterations");
-        loopProgressLogger.displayFreeMemory = true;
+        //  a "temporary" cluster list used to find the maximum cardinality
+        final IntArrayList[] tmpClusters = new IntArrayList[instanceCount];
+        for (int i = 0; i < instanceCount; i++) {
+            tmpClusters[i] = new IntArrayList();
+        }
 
-        for (int i = 0; i < instanceCount; ++i) { // i : cluster index
-            // ignore instance i if part of previously selected clusters.
-            if (!clustersCannotOverlap || !ignoreList.get(i)) {
+        // loop over the instances until they have all been added to a cluster
+        while (!instanceList.isEmpty()) {
+            // cluster the remaining instances to find the maximum cardinality
+            int tmpClusterCount = 0;
+            for (int i = 0; i < instanceCount; i++) {
+                tmpClusters[i].clear();
+            }
+            final LinkedList<Integer> notClustered =
+                    (LinkedList<Integer>) instanceList.clone();
+
+            while (!notClustered.isEmpty()) {
+                // add the first instance to the next cluster
+                final IntArrayList currentCluster =
+                        tmpClusters[tmpClusterCount];
+                currentCluster.add(notClustered.removeFirst());
+                tmpClusterCount++;
+
                 boolean done = false;
-                addToCluster(i, i);
-                jVisited.clear();
-                while (!done && instances > 1) {
-                    double distance_i_j = Double.MAX_VALUE;
-                    int minDistanceInstanceIndex = -1;
-                    loopProgressLogger.expectedUpdates = instanceCount;
-                    loopProgressLogger.start();
+                while (!done && !notClustered.isEmpty()) {
+                    // find the node that has minimum distance between the
+                    // current cluster and the instances that have not yet
+                    // been clustered
+                    double minDistance = Double.MAX_VALUE;
+                    int minDistanceInstanceIndex = 0;
+                    int instanceIndex = 0;
+                    for (final int instance : notClustered) {
+                        final double newDistance =
+                                calculator.distance(currentCluster.elements(),
+                                        currentCluster.size(), instance);
 
-                    // find instance j such that distance i,j minimum
-                    for (int j = 0; j < instanceCount; ++j) {
-                        if (!ignoreList.get(j)) {
-                            if (i != j) {
-                                if (!jVisited.get(j)) {
-                                    final double newDistance =
-                                            calculator.distance(clusters[i],
-                                                    clusterSizes[i], j);
-
-                                    if (newDistance < distance_i_j) {
-                                        distance_i_j = newDistance;
-                                        minDistanceInstanceIndex = j;
-                                        jVisited.put(j, true);
-                                    }
-                                }
-                            }
+                        if (newDistance < minDistance) {
+                            minDistance = newDistance;
+                            minDistanceInstanceIndex = instanceIndex;
                         }
-                        loopProgressLogger.update();
+                        instanceIndex++;
                     }
 
                     // grow clusters until min distance between new instance
-                    // and cluster reaches quality threshold:
-                    if (distance_i_j > qualityThreshold) {
+                    // and cluster reaches quality threshold
+                    // if (diameter(Ai U {j}) > d)
+                    if (minDistance > qualityThreshold) {
                         done = true;
                     } else {
-                        if (clustersCannotOverlap
-                                && ignoreList.get(minDistanceInstanceIndex)) {
-                            done = true;
-                        } else {
-                            final boolean added =
-                                    addToCluster(minDistanceInstanceIndex, i);
-                            if (!added && jVisited.get(minDistanceInstanceIndex)) {
-                                done = true;
-                                LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex, i, distance_i_j));
-
-                            } else {
-                                loopProgressLogger.expectedUpdates = instanceCount;
-                            }
-                        }
+                        currentCluster.add(notClustered.remove(minDistanceInstanceIndex));
                     }
                 }
             }
 
-            loopProgressLogger.update();
-        }
-
-        // identify cluster with maximum cardinality
-        int maxCardinality = 0;
-        int selectedClusterIndex = -1;
-        for (int l = 0; l < clusterSizes.length; ++l) {
-            if (clusterSizes[l] > maxCardinality) {
-                maxCardinality = clusterSizes[l];
-                selectedClusterIndex = l;
+            // identify cluster (set C) with maximum cardinality
+            int maxCardinality = 0;
+            int selectedClusterIndex = -1;
+            for (int i = 0; i < tmpClusterCount; i++) {
+                final int size = tmpClusters[i].size();
+                if (size > maxCardinality) {
+                    maxCardinality = size;
+                    selectedClusterIndex = i;
+                }
             }
-        }
-        final int[] selectedCluster =
-                getClusters().get(selectedClusterIndex).clone();
-        result.add(selectedCluster);
+            final IntArrayList selectedCluster =
+                    tmpClusters[selectedClusterIndex];
 
-        int instancesLeft = instances;
-        for (final int ignoreInstance : selectedCluster) {
-            // mark instances of the selected cluster so that they are
-            // ignored in subsequent passes.
-            ignoreList.put(ignoreInstance, true);
-            progressLogger.update();
-            --instancesLeft;
+            // and add that cluster to the final result
+            clusters[clusterCount].addAll(selectedCluster);
+
+            // remove instances in the cluster so they are no longer considered
+            instanceList.removeAll(selectedCluster);
+
+            for (int i = 0; i < selectedCluster.size(); i++) {
+                clusterProgressLogger.update();
+            }
+
+            clusterCount++;
+            // next iteration is over (G - C)
         }
 
-        // recurse.
-        cluster(result, calculator, qualityThreshold, ignoreList,
-                instancesLeft, progressLogger);
+        clusterProgressLogger.done();
+        return getClusters();
+    }
+
+    /**
+     * Returns the list of clusters produced by clustering.
+     *
+     * @return A list of integer arrays, where each array represents a cluster
+     *         and contains the index of the instance that belongs to a given
+     *         cluster.
+     */
+    public List<int[]> getClusters() {
+        final List<int[]> result = new ArrayList<int[]>(clusterCount);
+        for (int i = 0; i < clusterCount; i++) {
+            result.add(clusters[i].toIntArray());
+        }
+        return result;
     }
 }

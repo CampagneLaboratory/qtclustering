@@ -29,36 +29,6 @@ import junit.framework.TestCase;
  * To change this template use File | Settings | File Templates.
  */
 public final class TestQTClusterer extends TestCase {
-    /**
-     * Check that data structures used to store clusters work as they should.
-     */
-    public void testDataStorage() {
-        // put one instance in each cluster, total two instances
-        QTClusterer clusterer = new QTClusterer(2);
-        clusterer.addToCluster(0, 0);
-        clusterer.addToCluster(1, 1);
-        List<int []> clusters = clusterer.getClusters();
-        assertNotNull(clusters.get(0));
-        assertNotNull(clusters.get(1));
-        assertEquals(1, clusters.get(0).length);
-        assertEquals(1, clusters.get(1).length);
-        assertEquals(0, clusters.get(0)[0]);
-        assertEquals(1, clusters.get(1)[0]);
-
-        // put two instances in the first cluster, none in the second, total two
-        // instances
-        clusterer = new QTClusterer(2);
-        clusterer.addToCluster(0, 0);
-        clusterer.addToCluster(1, 0);
-        clusters = clusterer.getClusters();
-        assertNotNull(clusters.get(0));
-        assertNotNull(clusters.get(1));
-        assertEquals(clusters.get(0).length, 2);
-        assertEquals(clusters.get(1).length, 0);
-        assertEquals(0, clusters.get(0)[0]);
-        assertEquals(1, clusters.get(0)[1]);
-    }
-
     public void testOneInstancePerCluster() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(2);
@@ -188,6 +158,7 @@ public final class TestQTClusterer extends TestCase {
                 return 0;    // instances 0-3 belong to the same cluster
             }
         };
+
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
         assertEquals("Expected one cluster", 1, clusters.size());

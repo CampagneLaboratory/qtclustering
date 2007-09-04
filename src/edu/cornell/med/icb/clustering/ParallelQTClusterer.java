@@ -43,6 +43,7 @@ import java.util.List;
  * easy to plugin a new distance similarity measure or a new linkage method
  * (just implement the interface {@link SimilarityDistanceCalculator}).
  */
+@Deprecated
 public final class ParallelQTClusterer extends AbstractQTClusterer {
     /**
      * Used to log debug and informational messages.
@@ -198,7 +199,7 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                     loopProgressLogger.expectedUpdates = instanceCount;
                     loopProgressLogger.start();
 
-                    distance_i_j.setValue(Double.MAX_VALUE);
+                    //distance_i_j.setValue(Double.MAX_VALUE);
                     minDistanceInstanceIndex.setValue(-1);
 
                     // find instance j such that distance i,j minimum
@@ -226,8 +227,7 @@ public final class ParallelQTClusterer extends AbstractQTClusterer {
                                             }
                                         }
                                         loopProgressLogger.update();
-
-                                    }
+                                     }
 
                                     final int k = getThreadIndex();
                                     distances[k] = dij;
