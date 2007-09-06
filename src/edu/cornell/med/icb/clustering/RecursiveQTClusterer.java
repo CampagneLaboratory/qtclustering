@@ -123,9 +123,15 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
             return;
         }
 
-        final ProgressLogger loopProgressLogger =
-                new ProgressLogger(LOGGER, logInterval, "iterations");
-        loopProgressLogger.displayFreeMemory = true;
+        final ProgressLogger innerLoopProgressLogger =
+                new ProgressLogger(LOGGER, logInterval, "inner loop iterations");
+        innerLoopProgressLogger.displayFreeMemory = false;
+
+        final ProgressLogger outerLoopProgressLogger =
+                new ProgressLogger(LOGGER, logInterval, "outer loop iterations");
+        outerLoopProgressLogger.displayFreeMemory = false;
+        outerLoopProgressLogger.expectedUpdates = instanceCount;
+        outerLoopProgressLogger.start();
 
         for (int i = 0; i < instanceCount; ++i) { // i : cluster index
             // ignore instance i if part of previously selected clusters.
@@ -136,8 +142,8 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
                 while (!done && instances > 1) {
                     double distance_i_j = Double.MAX_VALUE;
                     int minDistanceInstanceIndex = -1;
-                    loopProgressLogger.expectedUpdates = instanceCount;
-                    loopProgressLogger.start();
+                    innerLoopProgressLogger.expectedUpdates = instanceCount;
+                    innerLoopProgressLogger.start();
 
                     // find instance j such that distance i,j minimum
                     for (int j = 0; j < instanceCount; ++j) {
@@ -156,7 +162,7 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
                                 }
                             }
                         }
-                        loopProgressLogger.update();
+                        innerLoopProgressLogger.update();
                     }
 
                     // grow clusters until min distance between new instance
@@ -175,15 +181,16 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
                                 LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex, i, distance_i_j));
 
                             } else {
-                                loopProgressLogger.expectedUpdates = instanceCount;
+                                innerLoopProgressLogger.expectedUpdates = instanceCount;
                             }
                         }
                     }
                 }
+                innerLoopProgressLogger.done();
             }
-
-            loopProgressLogger.update();
+            outerLoopProgressLogger.update();
         }
+        outerLoopProgressLogger.done();
 
         // identify cluster with maximum cardinality
         int maxCardinality = 0;

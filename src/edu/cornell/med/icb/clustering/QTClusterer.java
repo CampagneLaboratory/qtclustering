@@ -32,7 +32,7 @@ import java.util.List;
  * See  http://en.wikipedia.org/wiki/Data_clustering#Types_of_clustering
  * and http://www.genome.org/cgi/content/full/9/11/1106 Heyer LJ et al 1999.
  * (just implement the interface
- * {@link SimilarityDistanceCalculator}).
+ * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}).
  *
  */
 public final class QTClusterer implements Clusterer {
@@ -49,7 +49,7 @@ public final class QTClusterer implements Clusterer {
     /**
      * The time interval for a new log in milliseconds.
      *
-     * @see ProgressLogger#DEFAULT_LOG_INTERVAL
+     * @see it.unimi.dsi.mg4j.util.ProgressLogger#DEFAULT_LOG_INTERVAL
      */
     private long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
 
@@ -121,7 +121,7 @@ public final class QTClusterer implements Clusterer {
      * @param cannotOverlap Indicates whether or not clusters can overlap
      */
     public final void setClustersCannotOverlap(final boolean cannotOverlap) {
-        throw new UnsupportedOperationException("Not supported");
+        clustersCannotOverlap = cannotOverlap;
     }
 
     /**
@@ -142,8 +142,9 @@ public final class QTClusterer implements Clusterer {
         clusterProgressLogger.start("Starting to cluster "
                 + instanceCount + " instances");
 
-        // reset cluster resultstars
+        // reset cluster results
         clusterCount = 0;
+        // instanceList is the set "G" to cluster
         final LinkedList<Integer> instanceList = new LinkedList<Integer>();
         for (int i = 0; i < instanceCount; i++) {
             clusters[i].clear();
@@ -159,23 +160,39 @@ public final class QTClusterer implements Clusterer {
             tmpClusters[i] = new IntArrayList();
         }
 
+        final ProgressLogger innerLoopProgressLogger =
+                new ProgressLogger(LOGGER, logInterval, "inner loop iterations");
+        innerLoopProgressLogger.displayFreeMemory = false;
+
+        final ProgressLogger outerLoopProgressLogger =
+                new ProgressLogger(LOGGER, logInterval, "outer loop iterations");
+        outerLoopProgressLogger.displayFreeMemory = false;
+
         // loop over the instances until they have all been added to a cluster
         while (!instanceList.isEmpty()) {
             // cluster the remaining instances to find the maximum cardinality
-            int tmpClusterCount = 0;
             for (int i = 0; i < instanceCount; i++) {
                 tmpClusters[i].clear();
             }
-            final LinkedList<Integer> notClustered =
-                    (LinkedList<Integer>) instanceList.clone();
 
-            while (!notClustered.isEmpty()) {
+            outerLoopProgressLogger.expectedUpdates = instanceList.size();
+            outerLoopProgressLogger.start("Entering outer loop for "
+                    + instanceList.size() + " iterations");
+            // foreach i in G (instance list)
+            for (int i = 0; i < instanceList.size(); i++) {
+                @SuppressWarnings("unchecked")
+                final LinkedList<Integer> notClustered =
+                        (LinkedList<Integer>) instanceList.clone();
+
                 // add the first instance to the next cluster
-                final IntArrayList currentCluster =
-                        tmpClusters[tmpClusterCount];
-                currentCluster.add(notClustered.removeFirst());
-                tmpClusterCount++;
+                tmpClusters[i].add(notClustered.remove(i));
 
+                innerLoopProgressLogger.expectedUpdates = notClustered.size();
+                innerLoopProgressLogger.start("Entering inner loop for "
+                        +  notClustered.size() + " iterations");
+
+                // cluster the remaining instances to find the maximum
+                // cardinality find instance j such that distance i,j minimum
                 boolean done = false;
                 while (!done && !notClustered.isEmpty()) {
                     // find the node that has minimum distance between the
@@ -186,10 +203,10 @@ public final class QTClusterer implements Clusterer {
                     int instanceIndex = 0;
                     for (final int instance : notClustered) {
                         final double newDistance =
-                                calculator.distance(currentCluster.elements(),
-                                        currentCluster.size(), instance);
+                                calculator.distance(tmpClusters[i].elements(),
+                                        tmpClusters[i].size(), instance);
 
-                        if (newDistance < minDistance) {
+                        if (newDistance <= minDistance) {
                             minDistance = newDistance;
                             minDistanceInstanceIndex = instanceIndex;
                         }
@@ -202,28 +219,36 @@ public final class QTClusterer implements Clusterer {
                     if (minDistance > qualityThreshold) {
                         done = true;
                     } else {
-                        currentCluster.add(notClustered.remove(minDistanceInstanceIndex));
+                        tmpClusters[i].add(notClustered.remove(minDistanceInstanceIndex));
                     }
+                    innerLoopProgressLogger.update();
                 }
+                innerLoopProgressLogger.stop("Inner loop completed.");
+                outerLoopProgressLogger.update();
             }
+            outerLoopProgressLogger.stop("Outer loop completed.");
 
             // identify cluster (set C) with maximum cardinality
             int maxCardinality = 0;
             int selectedClusterIndex = -1;
-            for (int i = 0; i < tmpClusterCount; i++) {
+            for (int i = 0; i < instanceCount; i++) {
                 final int size = tmpClusters[i].size();
                 if (size > maxCardinality) {
                     maxCardinality = size;
                     selectedClusterIndex = i;
                 }
             }
+
             final IntArrayList selectedCluster =
                     tmpClusters[selectedClusterIndex];
+
+            LOGGER.info("adding " + selectedCluster.size()
+                    + " instances to cluster " + clusterCount);
 
             // and add that cluster to the final result
             clusters[clusterCount].addAll(selectedCluster);
 
-            // remove instances in the cluster so they are no longer considered
+            // remove instances in the cluster C so they are no longer considered
             instanceList.removeAll(selectedCluster);
 
             for (int i = 0; i < selectedCluster.size(); i++) {
@@ -234,7 +259,7 @@ public final class QTClusterer implements Clusterer {
             // next iteration is over (G - C)
         }
 
-        clusterProgressLogger.done();
+        clusterProgressLogger.stop("Clustering completed.");
         return getClusters();
     }
 
