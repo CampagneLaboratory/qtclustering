@@ -82,7 +82,7 @@ public final class TestRecursiveQTClusterer extends TestCase {
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
         assertEquals("Incorrect number of clusters", 1, clusters.size());
-        assertEquals("First cluster must have size 2", 4, clusters.get(0).length);
+        assertEquals("First cluster must have size 4", 4, clusters.get(0).length);
         assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
         assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
         assertEquals("Instance 2 in cluster 0", 2, clusters.get(0)[2]);

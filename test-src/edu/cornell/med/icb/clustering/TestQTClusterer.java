@@ -18,9 +18,10 @@
 
 package edu.cornell.med.icb.clustering;
 
-import java.util.List;
-
 import junit.framework.TestCase;
+import org.apache.commons.lang.ArrayUtils;
+
+import java.util.List;
 
 /**
  * User: Fabien Campagne
@@ -81,12 +82,13 @@ public final class TestQTClusterer extends TestCase {
         assertEquals(10d, distanceCalculator.distance(2, 3));
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
-        assertEquals("Incorrect number of clusters", 1, clusters.size());
-        assertEquals("First cluster must have size 2", 4, clusters.get(0).length);
-        assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
-        assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
-        assertEquals("Instance 2 in cluster 0", 2, clusters.get(0)[2]);
-        assertEquals("Instance 3 in cluster 0", 3, clusters.get(0)[3]);
+        assertEquals("Expected one cluster", 1, clusters.size());
+        final int[] cluster = clusters.get(0);
+        assertEquals("First cluster must have size 4", 4, cluster.length);
+        assertTrue("Instance 0 in cluster 0", ArrayUtils.contains(cluster, 0));
+        assertTrue("Instance 1 in cluster 0", ArrayUtils.contains(cluster, 1));
+        assertTrue("Instance 2 in cluster 0", ArrayUtils.contains(cluster, 2));
+        assertTrue("Instance 3 in cluster 0", ArrayUtils.contains(cluster, 3));
     }
 
     public void testFourInstanceClusteringInThreeClusters() {
@@ -162,11 +164,74 @@ public final class TestQTClusterer extends TestCase {
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
         assertEquals("Expected one cluster", 1, clusters.size());
-        assertEquals("First cluster must have size 4", 4, clusters.get(0).length);
+        final int[] cluster = clusters.get(0);
+        assertEquals("First cluster must have size 4", 4, cluster.length);
+        assertTrue("Instance 0 in cluster 0", ArrayUtils.contains(cluster, 0));
+        assertTrue("Instance 1 in cluster 0", ArrayUtils.contains(cluster, 1));
+        assertTrue("Instance 2 in cluster 0", ArrayUtils.contains(cluster, 2));
+        assertTrue("Instance 3 in cluster 0", ArrayUtils.contains(cluster, 3));
+    }
 
-        assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
-        assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
-        assertEquals("Instance 2 in cluster 0", 2, clusters.get(0)[2]);
-        assertEquals("Instance 3 in cluster 0", 3, clusters.get(0)[3]);
+    public void testMultipleThresholds() {
+        final int[] data = {
+            1, 2, 3, 3, 2, 1, 42, 43, 4, 6
+        };
+
+        final Clusterer iterative = new QTClusterer(data.length);
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
+                    @Override
+                    public double distance(final int instanceIndex,
+                                           final int otherInstanceIndex) {
+                        return Math.abs(data[instanceIndex] - data[otherInstanceIndex]);
+                    }
+                };
+
+/*
+0:{1}
+1:{2}
+2:{3}
+3:{3}
+4:{2}
+5:{1}
+6:{42}
+7:{43}
+8:{4}
+9:{6}
+Iterative clusters - threshold = 1
+0:{1,1,2,2}
+1:{3,3,4}
+2:{42,43}
+3:{6}
+Iterative clusters - threshold = 2
+0:{1,1,2,2,3,3}
+1:{42,43}
+2:{4,6}
+Iterative clusters - threshold = 3
+0:{1,1,2,2,3,3,4}
+1:{42,43}
+2:{6}
+Iterative clusters - threshold = 4
+0:{1,1,2,2,3,3,4}
+1:{42,43}
+2:{6}
+Iterative clusters - threshold = 5
+0:{1,1,2,2,3,3,4,6}
+1:{42,43}
+ */
+        for (int i = 0; i <= 5; i++) {
+            final List<int[]> iClusters = iterative.cluster(distanceCalculator, i);
+            assertNotNull(iClusters);
+
+            System.out.println("Iterative clusters - threshold = " + i);
+            int j = 0;
+            for (final int[] cluster : iClusters) {
+                final int[] result = new int[cluster.length];
+                for (int k = 0; k < result.length; k++) {
+                    result[k] = data[cluster[k]];
+                }
+                System.out.println(j++ + ":" + ArrayUtils.toString(result));
+            }
+        }
     }
 }

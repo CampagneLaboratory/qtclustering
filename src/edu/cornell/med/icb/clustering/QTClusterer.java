@@ -242,9 +242,10 @@ public final class QTClusterer implements Clusterer {
             final IntArrayList selectedCluster =
                     tmpClusters[selectedClusterIndex];
 
-            LOGGER.info("adding " + selectedCluster.size()
-                    + " instances to cluster " + clusterCount);
-
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("adding " + selectedCluster.size()
+                        + " instances to cluster " + clusterCount);
+            }
             // and add that cluster to the final result
             clusters[clusterCount].addAll(selectedCluster);
 
