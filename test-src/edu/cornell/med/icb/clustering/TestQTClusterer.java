@@ -18,8 +18,11 @@
 
 package edu.cornell.med.icb.clustering;
 
-import junit.framework.TestCase;
 import org.apache.commons.lang.ArrayUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -29,8 +32,11 @@ import java.util.List;
  * Time: 6:59:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public final class TestQTClusterer extends TestCase {
-    public void testOneInstancePerCluster() {
+public final class TestQTClusterer {
+    private static final double DELTA = 0.00001;
+
+    @org.junit.Test
+    public void oneInstancePerCluster() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(2);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
@@ -44,10 +50,10 @@ public final class TestQTClusterer extends TestCase {
             }
         };
 
-        assertEquals(100d, distanceCalculator.distance(0, 1));
-        assertEquals(100d, distanceCalculator.distance(1, 0));
-        assertEquals(0d, distanceCalculator.distance(0, 0));
-        assertEquals(0d, distanceCalculator.distance(1, 1));
+        assertEquals(100d, distanceCalculator.distance(0, 1), DELTA);
+        assertEquals(100d, distanceCalculator.distance(1, 0), DELTA);
+        assertEquals(0d, distanceCalculator.distance(0, 0) , DELTA);
+        assertEquals(0d, distanceCalculator.distance(1, 1), DELTA);
 
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
@@ -59,7 +65,8 @@ public final class TestQTClusterer extends TestCase {
 
     }
 
-    public void testFourInstanceClusteringInOneCluster() {
+    @Test
+    public void fourInstanceClusteringInOneCluster() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
@@ -75,11 +82,11 @@ public final class TestQTClusterer extends TestCase {
         };
         // instances 0,1,2,3 go to cluster 1 (distance(0,1)=0; distance(2,0)=10<=threshold)
 
-        assertEquals(0d, distanceCalculator.distance(0, 1));
-        assertEquals(0d, distanceCalculator.distance(1, 0));
-        assertEquals(10d, distanceCalculator.distance(0, 2));
-        assertEquals(10d, distanceCalculator.distance(2, 0));
-        assertEquals(10d, distanceCalculator.distance(2, 3));
+        assertEquals(0d, distanceCalculator.distance(0, 1), DELTA);
+        assertEquals(0d, distanceCalculator.distance(1, 0), DELTA);
+        assertEquals(10d, distanceCalculator.distance(0, 2), DELTA);
+        assertEquals(10d, distanceCalculator.distance(2, 0), DELTA);
+        assertEquals(10d, distanceCalculator.distance(2, 3), DELTA);
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
         assertEquals("Expected one cluster", 1, clusters.size());
@@ -91,7 +98,8 @@ public final class TestQTClusterer extends TestCase {
         assertTrue("Instance 3 in cluster 0", ArrayUtils.contains(cluster, 3));
     }
 
-    public void testFourInstanceClusteringInThreeClusters() {
+    @Test
+    public void fourInstanceClusteringInThreeClusters() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
@@ -106,11 +114,11 @@ public final class TestQTClusterer extends TestCase {
                 }
             }
         };
-        assertEquals(0d, distanceCalculator.distance(0, 1));
-        assertEquals(0d, distanceCalculator.distance(1, 0));
-        assertEquals(11d, distanceCalculator.distance(0, 2));
-        assertEquals(11d, distanceCalculator.distance(2, 0));
-        assertEquals(11d, distanceCalculator.distance(2, 3));
+        assertEquals(0d, distanceCalculator.distance(0, 1), DELTA);
+        assertEquals(0d, distanceCalculator.distance(1, 0), DELTA);
+        assertEquals(11d, distanceCalculator.distance(0, 2), DELTA);
+        assertEquals(11d, distanceCalculator.distance(2, 0), DELTA);
+        assertEquals(11d, distanceCalculator.distance(2, 3), DELTA);
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
         assertEquals("Incorrect number of clusters", 3, clusters.size());
@@ -123,7 +131,8 @@ public final class TestQTClusterer extends TestCase {
         assertEquals("Instance 3 in cluster 2", 3, clusters.get(2)[0]);
     }
 
-    public void testFourInstanceClusteringInFourClusters() {
+    @Test
+    public void fourInstanceClusteringInFourClusters() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
@@ -151,7 +160,8 @@ public final class TestQTClusterer extends TestCase {
         assertEquals("Instance 3 in cluster 3", 3, clusters.get(2)[0]);
     }
 
-    public void testOther() {
+    @Test
+    public void zeroDistanceCalculator() {
         final QTClusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
 
@@ -172,12 +182,14 @@ public final class TestQTClusterer extends TestCase {
         assertTrue("Instance 3 in cluster 0", ArrayUtils.contains(cluster, 3));
     }
 
-    public void testMultipleThresholds() {
+    @Test
+    public void multipleThresholds() {
         final int[] data = {
             1, 2, 3, 3, 2, 1, 42, 43, 4, 6
         };
 
         final Clusterer iterative = new QTClusterer(data.length);
+        final Clusterer recursive = new RecursiveQTClusterer(data.length);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
                     @Override
@@ -219,6 +231,7 @@ Iterative clusters - threshold = 5
 0:{1,1,2,2,3,3,4,6}
 1:{42,43}
  */
+
         for (int i = 0; i <= 5; i++) {
             final List<int[]> iClusters = iterative.cluster(distanceCalculator, i);
             assertNotNull(iClusters);
@@ -226,6 +239,19 @@ Iterative clusters - threshold = 5
             System.out.println("Iterative clusters - threshold = " + i);
             int j = 0;
             for (final int[] cluster : iClusters) {
+                final int[] result = new int[cluster.length];
+                for (int k = 0; k < result.length; k++) {
+                    result[k] = data[cluster[k]];
+                }
+                System.out.println(j++ + ":" + ArrayUtils.toString(result));
+            }
+
+            final List<int[]> rClusters = recursive.cluster(distanceCalculator, i);
+            assertNotNull(rClusters);
+
+            System.out.println("Recursive clusters - threshold = " + i);
+            j = 0;
+            for (final int[] cluster : rClusters) {
                 final int[] result = new int[cluster.length];
                 for (int k = 0; k < result.length; k++) {
                     result[k] = data[cluster[k]];

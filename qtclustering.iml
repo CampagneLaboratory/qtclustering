@@ -34,7 +34,9 @@
           <root url="jar://$MODULE_DIR$/lib/junit-4.4.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../../java/junit-4.4-src.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

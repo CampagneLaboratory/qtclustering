@@ -88,7 +88,7 @@ public final class QTClusterer implements Clusterer {
      *
      * @return the logging interval in milliseconds.
      */
-    public final long getLogInterval() {
+    public long getLogInterval() {
         return logInterval;
     }
 
@@ -97,7 +97,7 @@ public final class QTClusterer implements Clusterer {
      *
      * @param interval the logging interval in milliseconds.
      */
-    public final void setLogInterval(final long interval) {
+    public void setLogInterval(final long interval) {
         this.logInterval = interval;
     }
 
@@ -108,7 +108,7 @@ public final class QTClusterer implements Clusterer {
      *
      * @return whether or not clusters can overlap
      */
-    public final boolean isClustersCannotOverlap() {
+    public boolean isClustersCannotOverlap() {
         return clustersCannotOverlap;
     }
 
@@ -120,7 +120,7 @@ public final class QTClusterer implements Clusterer {
      *
      * @param cannotOverlap Indicates whether or not clusters can overlap
      */
-    public final void setClustersCannotOverlap(final boolean cannotOverlap) {
+    public void setClustersCannotOverlap(final boolean cannotOverlap) {
         clustersCannotOverlap = cannotOverlap;
     }
 
@@ -132,7 +132,7 @@ public final class QTClusterer implements Clusterer {
      * @param qualityThreshold The QT clustering algorithm quality threshold (d)
      * @return The list of clusters.
      */
-    public final List<int[]> cluster(
+    public List<int[]> cluster(
             final SimilarityDistanceCalculator calculator,
             final float qualityThreshold) {
         final ProgressLogger clusterProgressLogger =

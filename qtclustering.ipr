@@ -8,17 +8,19 @@
       <customJdkName value="" />
       <maximumHeapSize value="128" />
       <properties />
-      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestParallelQTClusterer.testFourInstanceClusteringInOneCluster" />
-      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testFourInstanceClusteringInOneCluster" />
-      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestLargeCluster.parallelClusterer" />
-      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestParallelQTClusterer" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestLargeCluster" />
-      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testMultipleClustersWithSameSize" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestLargeCluster.singleThreadClusterer" />
-      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testEvenAndOdd" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestRecursiveQTClusterer" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testMultipleThresholds" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testFourInstanceClusteringInOneCluster" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestParallelQTClusterer.testFourInstanceClusteringInOneCluster" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestLargeCluster.parallelClusterer" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestParallelQTClusterer" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testMultipleClustersWithSameSize" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testEvenAndOdd" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.multipleThresholds" />
     </buildFile>
     <buildFile url="file://$PROJECT_DIR$/release.xml">
       <additionalClassPath />
@@ -68,6 +70,7 @@
         <option name="GENERATE_FINAL_LOCALS" value="true" />
         <option name="GENERATE_FINAL_PARAMETERS" value="true" />
         <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="50" />
+        <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="50" />
         <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
           <value />
         </option>

@@ -42,12 +42,12 @@ import java.util.ArrayList;
  *         Date: Oct 2, 2005
  *         Time: 6:23:51 PM
  */
-@Deprecated
 public final class RecursiveQTClusterer extends AbstractQTClusterer {
     /**
      * Used to log debug and informational messages.
      */
-    private static final Logger LOGGER = Logger.getLogger(QTClusterer.class);
+    private static final Logger LOGGER =
+            Logger.getLogger(RecursiveQTClusterer.class);
 
     /**
      * Construct a new quality threshold clusterer.
@@ -66,7 +66,7 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
      * @param qualityThreshold The QT clustering algorithm quality threshold.
      * @return The list of clusters.
      */
-    public final List<int[]> cluster(
+    public List<int[]> cluster(
             final SimilarityDistanceCalculator calculator,
             final float qualityThreshold) {
         final ProgressLogger clusterProgressLogger =
@@ -137,9 +137,10 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
             // ignore instance i if part of previously selected clusters.
             if (!clustersCannotOverlap || !ignoreList.get(i)) {
                 boolean done = false;
-                addToCluster(i, i);
                 jVisited.clear();
-                while (!done && instances > 1) {
+                addToCluster(i, i);
+                jVisited.put(i, true);
+                while (!done) {
                     double distance_i_j = Double.MAX_VALUE;
                     int minDistanceInstanceIndex = -1;
                     innerLoopProgressLogger.expectedUpdates = instanceCount;
@@ -147,19 +148,14 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
 
                     // find instance j such that distance i,j minimum
                     for (int j = 0; j < instanceCount; ++j) {
-                        if (!ignoreList.get(j)) {
-                            if (i != j) {
-                                if (!jVisited.get(j)) {
-                                    final double newDistance =
-                                            calculator.distance(clusters[i],
-                                                    clusterSizes[i], j);
+                        if (!ignoreList.get(j) && !jVisited.get(j)) {
+                            final double newDistance =
+                                    calculator.distance(clusters[i],
+                                            clusterSizes[i], j);
 
-                                    if (newDistance < distance_i_j) {
-                                        distance_i_j = newDistance;
-                                        minDistanceInstanceIndex = j;
-                                        jVisited.put(j, true);
-                                    }
-                                }
+                            if (newDistance < distance_i_j) {
+                                distance_i_j = newDistance;
+                                minDistanceInstanceIndex = j;
                             }
                         }
                         innerLoopProgressLogger.update();
@@ -176,7 +172,8 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
                         } else {
                             final boolean added =
                                     addToCluster(minDistanceInstanceIndex, i);
-                            if (!added && jVisited.get(minDistanceInstanceIndex)) {
+                            jVisited.put(minDistanceInstanceIndex, true);
+                            if (!added) {
                                 done = true;
                                 LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex, i, distance_i_j));
 
