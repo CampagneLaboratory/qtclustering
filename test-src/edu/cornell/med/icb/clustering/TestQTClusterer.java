@@ -53,7 +53,7 @@ public final class TestQTClusterer {
     @Test
     public void oneInstancePerCluster() {
         // put one instance in each cluster, total two instances
-        final QTClusterer clusterer = new QTClusterer(2);
+        final Clusterer clusterer = new QTClusterer(2);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
             @Override
@@ -85,7 +85,7 @@ public final class TestQTClusterer {
     @Test
     public void fourInstanceClusteringInOneCluster() {
         // put one instance in each cluster, total two instances
-        final QTClusterer clusterer = new QTClusterer(4);
+        final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
                     @Override
@@ -121,7 +121,7 @@ public final class TestQTClusterer {
     @Test
     public void fourInstanceClusteringInThreeClusters() {
         // put one instance in each cluster, total two instances
-        final QTClusterer clusterer = new QTClusterer(4);
+        final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
                     @Override
@@ -182,7 +182,7 @@ public final class TestQTClusterer {
 
     @Test
     public void zeroDistanceCalculator() {
-        final QTClusterer clusterer = new QTClusterer(4);
+        final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
                     @Override
@@ -208,8 +208,7 @@ public final class TestQTClusterer {
      */
     @Test
     public void zeroInstances() {
-        final Clusterer iterative = new QTClusterer(0);
-        final Clusterer recursive = new RecursiveQTClusterer(0);
+        final Clusterer clusterer = new QTClusterer(0);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
                     @Override
@@ -219,11 +218,7 @@ public final class TestQTClusterer {
                     }
                 };
 
-        List<int[]> result = iterative.cluster(distanceCalculator, 0);
-        assertNotNull(result);
-        assertEquals(0, result.size());
-
-        result = recursive.cluster(distanceCalculator, 0);
+        final List<int[]> result = clusterer.cluster(distanceCalculator, 0);
         assertNotNull(result);
         assertEquals(0, result.size());
     }

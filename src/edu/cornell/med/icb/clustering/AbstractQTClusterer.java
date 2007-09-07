@@ -54,6 +54,10 @@ public abstract class AbstractQTClusterer implements Clusterer {
      */
     public AbstractQTClusterer(final int numberOfInstances) {
         super();
+        if (numberOfInstances < 0) {
+            throw new IllegalArgumentException("Number of instances ("
+                    + numberOfInstances + ") must not be negative");
+        }
         clusterCount = numberOfInstances;
         // Data elements are available only if k<clusterSizes[l]
         clusters = new int[clusterCount][numberOfInstances];
