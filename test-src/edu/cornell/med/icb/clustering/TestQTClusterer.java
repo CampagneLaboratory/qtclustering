@@ -86,17 +86,18 @@ public final class TestQTClusterer {
     public void fourInstanceClusteringInOneCluster() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(4);
-        final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
-            @Override
-            public double distance(final int instanceIndex, final int otherInstanceIndex) {
-                if (instanceIndex == 0 && otherInstanceIndex == 1 ||
-                        instanceIndex == 1 && otherInstanceIndex == 0) {
-                    return 0;    // instances 0 and 1 belong to same cluster
-                } else {
-                    return 10;
-                }
-            }
-        };
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
+                    @Override
+                    public double distance(final int i, final int j) {
+                        // instances 0 and 1 belong to same cluster
+                        if (i == 0 && j == 1 || i == 1 && j == 0) {
+                            return 0;
+                        } else {
+                            return 10;
+                        }
+                    }
+                };
         // instances 0,1,2,3 go to cluster 1 (distance(0,1)=0; distance(2,0)=10<=threshold)
 
         assertEquals(0d, distanceCalculator.distance(0, 1), DELTA);
@@ -121,18 +122,18 @@ public final class TestQTClusterer {
     public void fourInstanceClusteringInThreeClusters() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(4);
-        final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
-
-            @Override
-            public double distance(final int instanceIndex, final int otherInstanceIndex) {
-                if (instanceIndex == 0 && otherInstanceIndex == 1 ||
-                        instanceIndex == 1 && otherInstanceIndex == 0) {
-                    return 0;    // instances 0 and 1 belong to same cluster
-                } else {
-                    return 11;
-                }
-            }
-        };
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
+                    @Override
+                    public double distance(final int i, final int j) {
+                        // instances 0 and 1 belong to same cluster
+                        if (i == 0 && j == 1 || i == 1 && j == 0) {
+                            return 0;
+                        } else {
+                            return 11;
+                        }
+                    }
+                };
         assertEquals(0d, distanceCalculator.distance(0, 1), DELTA);
         assertEquals(0d, distanceCalculator.distance(1, 0), DELTA);
         assertEquals(11d, distanceCalculator.distance(0, 2), DELTA);
@@ -154,18 +155,18 @@ public final class TestQTClusterer {
     public void fourInstanceClusteringInFourClusters() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(4);
-        final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
-
-            @Override
-            public double distance(final int instanceIndex, final int otherInstanceIndex) {
-                if (instanceIndex == 0 && otherInstanceIndex == 1 ||
-                        instanceIndex == 1 && otherInstanceIndex == 0) {
-                    return 0;    // instances 0 and 1 belong to same cluster
-                } else {
-                    return 10;
-                }
-            }
-        };
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
+                    @Override
+                    public double distance(final int i, final int j) {
+                        // instances 0 and 1 belong to same cluster
+                        if (i == 0 && j == 1 || i == 1 && j == 0) {
+                            return 0;
+                        } else {
+                            return 10;
+                        }
+                    }
+                };
 
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
@@ -182,13 +183,13 @@ public final class TestQTClusterer {
     @Test
     public void zeroDistanceCalculator() {
         final QTClusterer clusterer = new QTClusterer(4);
-        final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
-
-            @Override
-            public double distance(final int instanceIndex, final int otherInstanceIndex) {
-                return 0;    // instances 0-3 belong to the same cluster
-            }
-        };
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
+                    @Override
+                    public double distance(final int i, final int j) {
+                        return 0;   // instances 0-3 belong to the same cluster
+                    }
+                };
 
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
@@ -248,7 +249,7 @@ public final class TestQTClusterer {
         };
 
         // list of expected results per threshold tested
-        final List[] expectedResults = new List[6];
+        final List<int[]>[] expectedResults = new List[6];
         // threshold = 0 ( each instance in it's own cluster )
         expectedResults[0] = new ArrayList<int[]>();
         for (final int i : data) {
@@ -256,29 +257,29 @@ public final class TestQTClusterer {
         }
 
         // threshold = 1
-        expectedResults[1] = new ArrayList();
+        expectedResults[1] = new ArrayList<int[]>();
         expectedResults[1].add(new int[] { 1, 1, 2, 2 });
         expectedResults[1].add(new int[] { 3, 3, 4 });
         expectedResults[1].add(new int[] { 42, 43 });
         expectedResults[1].add(new int[] { 6 });
 
         // threshold = 2
-        expectedResults[2] = new ArrayList();
+        expectedResults[2] = new ArrayList<int[]>();
         expectedResults[2].add(new int[] { 1, 1, 2, 2, 3, 3 });
         expectedResults[2].add(new int[] { 42, 43 });
         expectedResults[2].add(new int[] { 4, 6 });
 
         // threshold = 3
-        expectedResults[3] = new ArrayList();
+        expectedResults[3] = new ArrayList<int[]>();
         expectedResults[3].add(new int[] { 1, 1, 2, 2, 3, 3, 4 });
         expectedResults[3].add(new int[] { 42, 43 });
         expectedResults[3].add(new int[] { 6 });
 
         // threshold = 4 (same as 3)
-        expectedResults[4] = new ArrayList(expectedResults[3]);
+        expectedResults[4] = new ArrayList<int[]>(expectedResults[3]);
 
         // threshold = 5
-        expectedResults[5] = new ArrayList();
+        expectedResults[5] = new ArrayList<int[]>();
         expectedResults[5].add(new int[] { 1, 1, 2, 2, 3, 3, 4, 6 });
         expectedResults[5].add(new int[] { 42, 43 });
 
@@ -294,7 +295,8 @@ public final class TestQTClusterer {
                 };
 
         for (int i = 0; i <= 5; i++) {
-            final List<int[]> clusters = clusterer.cluster(distanceCalculator, i);
+            final List<int[]> clusters =
+                    clusterer.cluster(distanceCalculator, i);
             assertNotNull("Cluster at threshold " + i, clusters);
 
             LOGGER.debug("Iterative clusters - threshold = " + i);
