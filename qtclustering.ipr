@@ -9,6 +9,7 @@
       <maximumHeapSize value="128" />
       <properties />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.zeroInstances" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestLargeCluster" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestLargeCluster.singleThreadClusterer" />
@@ -18,6 +19,9 @@
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestParallelQTClusterer.testFourInstanceClusteringInOneCluster" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestLargeCluster.parallelClusterer" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestParallelQTClusterer" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.zeroDistanceCalculator" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.fourInstanceClusteringInOneCluster" />
+      <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.illegalInstanceCount" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testMultipleClustersWithSameSize" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.testEvenAndOdd" />
       <executeOn event="beforeRun" target="compile-tests" runConfigurationType="JUnit" runConfigurationName="TestQTClusterer.multipleThresholds" />

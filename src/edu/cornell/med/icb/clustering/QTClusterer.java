@@ -76,6 +76,10 @@ public final class QTClusterer implements Clusterer {
      */
     public QTClusterer(final int numberOfInstances) {
         super();
+        if (numberOfInstances < 0) {
+            throw new IllegalArgumentException("Number of instances ("
+                    + numberOfInstances + ") must not be negative");
+        }
         instanceCount = numberOfInstances;
         clusters = new IntArrayList[instanceCount];
         for (int i = 0; i < instanceCount; i++) {

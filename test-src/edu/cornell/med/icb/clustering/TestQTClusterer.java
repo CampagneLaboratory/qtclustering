@@ -19,11 +19,13 @@
 package edu.cornell.med.icb.clustering;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,15 +35,30 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public final class TestQTClusterer {
+    /**
+     * Used to log debug and informational messages.
+     */
+    private static final Logger LOGGER =
+            Logger.getLogger(TestQTClusterer.class);
+
+    /**
+     * Default delta to use when comparing floating point values.
+     */
     private static final double DELTA = 0.00001;
 
-    @org.junit.Test
+    /**
+     * This test validates that each instance will be placed into it's own
+     * cluster when there is no overlap between them.
+     */
+    @Test
     public void oneInstancePerCluster() {
         // put one instance in each cluster, total two instances
         final QTClusterer clusterer = new QTClusterer(2);
-        final SimilarityDistanceCalculator distanceCalculator = new MaxLinkageDistanceCalculator() {
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
             @Override
-            public double distance(final int instanceIndex, final int otherInstanceIndex) {
+            public double distance(final int instanceIndex,
+                                   final int otherInstanceIndex) {
                 if (instanceIndex != otherInstanceIndex) {
                     return 100;
                 } else {
@@ -84,6 +101,8 @@ public final class TestQTClusterer {
 
         assertEquals(0d, distanceCalculator.distance(0, 1), DELTA);
         assertEquals(0d, distanceCalculator.distance(1, 0), DELTA);
+        assertEquals(10d, distanceCalculator.distance(0, 0), DELTA);
+        assertEquals(10d, distanceCalculator.distance(1, 1), DELTA);
         assertEquals(10d, distanceCalculator.distance(0, 2), DELTA);
         assertEquals(10d, distanceCalculator.distance(2, 0), DELTA);
         assertEquals(10d, distanceCalculator.distance(2, 3), DELTA);
@@ -182,81 +201,118 @@ public final class TestQTClusterer {
         assertTrue("Instance 3 in cluster 0", ArrayUtils.contains(cluster, 3));
     }
 
+    /**
+     * This test validates that the clusterer will not throw any
+     * errors when passed zero instances.
+     */
     @Test
-    public void multipleThresholds() {
-        final int[] data = {
-            1, 2, 3, 3, 2, 1, 42, 43, 4, 6
-        };
-
-        final Clusterer iterative = new QTClusterer(data.length);
-        final Clusterer recursive = new RecursiveQTClusterer(data.length);
+    public void zeroInstances() {
+        final Clusterer iterative = new QTClusterer(0);
+        final Clusterer recursive = new RecursiveQTClusterer(0);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int instanceIndex,
                                            final int otherInstanceIndex) {
-                        return Math.abs(data[instanceIndex] - data[otherInstanceIndex]);
+                        return Math.abs(instanceIndex - otherInstanceIndex);
                     }
                 };
 
-/*
-0:{1}
-1:{2}
-2:{3}
-3:{3}
-4:{2}
-5:{1}
-6:{42}
-7:{43}
-8:{4}
-9:{6}
-Iterative clusters - threshold = 1
-0:{1,1,2,2}
-1:{3,3,4}
-2:{42,43}
-3:{6}
-Iterative clusters - threshold = 2
-0:{1,1,2,2,3,3}
-1:{42,43}
-2:{4,6}
-Iterative clusters - threshold = 3
-0:{1,1,2,2,3,3,4}
-1:{42,43}
-2:{6}
-Iterative clusters - threshold = 4
-0:{1,1,2,2,3,3,4}
-1:{42,43}
-2:{6}
-Iterative clusters - threshold = 5
-0:{1,1,2,2,3,3,4,6}
-1:{42,43}
- */
+        List<int[]> result = iterative.cluster(distanceCalculator, 0);
+        assertNotNull(result);
+        assertEquals(0, result.size());
+
+        result = recursive.cluster(distanceCalculator, 0);
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    /**
+     * This test validates that the clusterer will not not allow a negative
+     * instance count.
+     */
+    @Test (expected=IllegalArgumentException.class)
+    public void illegalInstanceCount() {
+        new QTClusterer(-1);
+    }
+
+    /**
+     * This test validates that a dataset is clustered correctly using
+     * various different values of thresholds.
+     */
+    @Test
+    public void multipleThresholds() {
+        // raw data to test
+        final int[] data = {
+            1, 2, 3, 3, 2, 1, 42, 43, 4, 6
+        };
+
+        // list of expected results per threshold tested
+        final List[] expectedResults = new List[6];
+        // threshold = 0 ( each instance in it's own cluster )
+        expectedResults[0] = new ArrayList<int[]>();
+        for (final int i : data) {
+            expectedResults[0].add(new int[] { i });
+        }
+
+        // threshold = 1
+        expectedResults[1] = new ArrayList();
+        expectedResults[1].add(new int[] { 1, 1, 2, 2 });
+        expectedResults[1].add(new int[] { 3, 3, 4 });
+        expectedResults[1].add(new int[] { 42, 43 });
+        expectedResults[1].add(new int[] { 6 });
+
+        // threshold = 2
+        expectedResults[2] = new ArrayList();
+        expectedResults[2].add(new int[] { 1, 1, 2, 2, 3, 3 });
+        expectedResults[2].add(new int[] { 42, 43 });
+        expectedResults[2].add(new int[] { 4, 6 });
+
+        // threshold = 3
+        expectedResults[3] = new ArrayList();
+        expectedResults[3].add(new int[] { 1, 1, 2, 2, 3, 3, 4 });
+        expectedResults[3].add(new int[] { 42, 43 });
+        expectedResults[3].add(new int[] { 6 });
+
+        // threshold = 4 (same as 3)
+        expectedResults[4] = new ArrayList(expectedResults[3]);
+
+        // threshold = 5
+        expectedResults[5] = new ArrayList();
+        expectedResults[5].add(new int[] { 1, 1, 2, 2, 3, 3, 4, 6 });
+        expectedResults[5].add(new int[] { 42, 43 });
+
+
+        final Clusterer clusterer = new QTClusterer(data.length);
+        // Distance function that deturns the difference between instances
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
+                    @Override
+                    public double distance(final int i, final int j) {
+                        return Math.abs(data[i] - data[j]);
+                    }
+                };
 
         for (int i = 0; i <= 5; i++) {
-            final List<int[]> iClusters = iterative.cluster(distanceCalculator, i);
-            assertNotNull(iClusters);
+            final List<int[]> clusters = clusterer.cluster(distanceCalculator, i);
+            assertNotNull("Cluster at threshold " + i, clusters);
 
-            System.out.println("Iterative clusters - threshold = " + i);
+            LOGGER.debug("Iterative clusters - threshold = " + i);
+            final List<int[]> expectedCluster = expectedResults[i];
+
             int j = 0;
-            for (final int[] cluster : iClusters) {
+            for (final int[] cluster : clusters) {
+                // convert instance indexes from the cluster to data
                 final int[] result = new int[cluster.length];
                 for (int k = 0; k < result.length; k++) {
                     result[k] = data[cluster[k]];
                 }
-                System.out.println(j++ + ":" + ArrayUtils.toString(result));
-            }
-
-            final List<int[]> rClusters = recursive.cluster(distanceCalculator, i);
-            assertNotNull(rClusters);
-
-            System.out.println("Recursive clusters - threshold = " + i);
-            j = 0;
-            for (final int[] cluster : rClusters) {
-                final int[] result = new int[cluster.length];
-                for (int k = 0; k < result.length; k++) {
-                    result[k] = data[cluster[k]];
-                }
-                System.out.println(j++ + ":" + ArrayUtils.toString(result));
+                LOGGER.debug(j + ":" + ArrayUtils.toString(result));
+                final int[] expectedResult = expectedCluster.get(j);
+                assertTrue("Cluster " + j + "with threshold " + i
+                        + "does not match expected",
+                        ArrayUtils.isEquals(expectedResult, result));
+                j++;
             }
         }
     }
