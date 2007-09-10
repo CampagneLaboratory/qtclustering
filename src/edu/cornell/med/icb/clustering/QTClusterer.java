@@ -161,10 +161,10 @@ public final class QTClusterer extends AbstractQTClusterer {
                     } else {
                         tmpClusters[i].add(notClustered.remove(minDistanceInstanceIndex));
                     }
-                    innerLoopProgressLogger.update();
+                    innerLoopProgressLogger.lightUpdate();
                 }
                 innerLoopProgressLogger.stop("Inner loop completed.");
-                outerLoopProgressLogger.update();
+                outerLoopProgressLogger.lightUpdate();
             }
             outerLoopProgressLogger.stop("Outer loop completed.");
 
@@ -197,7 +197,7 @@ public final class QTClusterer extends AbstractQTClusterer {
             instanceList.removeAll(selectedCluster);
 
             for (int i = 0; i < selectedCluster.size(); i++) {
-                clusterProgressLogger.update();
+                clusterProgressLogger.lightUpdate();
             }
 
             clusterCount++;
