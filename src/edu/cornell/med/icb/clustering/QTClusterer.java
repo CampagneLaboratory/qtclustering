@@ -70,6 +70,11 @@ public final class QTClusterer implements Clusterer {
     private final IntArrayList[] clusters;
 
     /**
+     *  A "temporary" cluster list used to find the maximum cardinality.
+     */
+    private final IntArrayList[] tmpClusters;
+
+    /**
      * Construct a new quality threshold clusterer.
      *
      * @param numberOfInstances The number of instances to cluster.
@@ -83,8 +88,10 @@ public final class QTClusterer implements Clusterer {
         }
         instanceCount = numberOfInstances;
         clusters = new IntArrayList[instanceCount];
+        tmpClusters = new IntArrayList[instanceCount];
         for (int i = 0; i < instanceCount; i++) {
-            clusters[i] = new IntArrayList();
+            clusters[i] = new IntArrayList();     // NOPMD
+            tmpClusters[i] = new IntArrayList();  // NOPMD
         }
     }
 
@@ -157,12 +164,6 @@ public final class QTClusterer implements Clusterer {
             // set each node in the instance list to it's
             // original position in the source data array
             instanceList.add(i);
-        }
-
-        //  a "temporary" cluster list used to find the maximum cardinality
-        final IntArrayList[] tmpClusters = new IntArrayList[instanceCount];
-        for (int i = 0; i < instanceCount; i++) {
-            tmpClusters[i] = new IntArrayList();
         }
 
         final ProgressLogger innerLoopProgressLogger =

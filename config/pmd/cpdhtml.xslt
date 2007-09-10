@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Stylesheet to turn the XML output of CPD into a nice-looking HTML page -->
-<!-- $Id: cpdhtml.xslt,v 1.1 2006/08/14 14:09:56 tomcopeland Exp $ -->
+<!-- $Id: cpdhtml.xslt 4492 2006-08-14 14:09:56Z tomcopeland $ -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html" encoding="UTF-8" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
 	doctype-system="http://www.w3.org/TR/html4/loose.dtd" indent="yes"/>
