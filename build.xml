@@ -43,7 +43,7 @@
             <include name="*.jar"/>
         </fileset>
         <fileset dir="${lib}">
-            <include name="log4j-1.2.14.jar"/>
+            <include name="log4j-1.2.15.jar"/>
         </fileset>
     </path>
 

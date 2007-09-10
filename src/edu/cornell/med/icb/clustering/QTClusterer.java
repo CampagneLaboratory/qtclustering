@@ -20,6 +20,7 @@ package edu.cornell.med.icb.clustering;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -237,6 +238,10 @@ public final class QTClusterer implements Clusterer {
             int selectedClusterIndex = -1;
             for (int i = 0; i < instanceCount; i++) {
                 final int size = tmpClusters[i].size();
+                if (LOGGER.isTraceEnabled() && size > 0) {
+                    LOGGER.debug("potential cluster " + i + ": "
+                            + ArrayUtils.toString(tmpClusters[i]));
+                }
                 if (size > maxCardinality) {
                     maxCardinality = size;
                     selectedClusterIndex = i;

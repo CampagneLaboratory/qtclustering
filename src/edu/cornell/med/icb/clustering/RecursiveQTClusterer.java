@@ -22,6 +22,7 @@ import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 import org.apache.log4j.Logger;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -193,7 +194,13 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
         int maxCardinality = 0;
         int selectedClusterIndex = -1;
         for (int l = 0; l < clusterSizes.length; ++l) {
-            if (clusterSizes[l] > maxCardinality) {
+            final int size = clusterSizes[l];
+            if (LOGGER.isTraceEnabled() && size > 0) {
+                LOGGER.trace("potential cluster " + l + ": "
+                        + ArrayUtils.toString(getClusters().get(l)));
+            }
+
+            if (size > maxCardinality) {
                 maxCardinality = clusterSizes[l];
                 selectedClusterIndex = l;
             }

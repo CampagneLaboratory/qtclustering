@@ -244,6 +244,7 @@ public final class TestQTClusterer {
         };
 
         // list of expected results per threshold tested
+        @SuppressWarnings("unchecked")
         final List<int[]>[] expectedResults = new List[6];
         // threshold = 0 ( each instance in it's own cluster )
         expectedResults[0] = new ArrayList<int[]>();
