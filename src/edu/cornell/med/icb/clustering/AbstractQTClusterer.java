@@ -18,12 +18,7 @@
 
 package edu.cornell.med.icb.clustering;
 
-import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
-import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Base class for clustering implementationsx.
@@ -34,18 +29,22 @@ public abstract class AbstractQTClusterer implements Clusterer {
      */
     protected boolean clustersCannotOverlap = true;
 
-    protected final int clusterCount;
-    protected final int[][] clusters;
-    protected final int[] clusterSizes;
-    protected final int instanceCount;
-
-    protected final Int2BooleanMap jVisited;
     /**
      * The time interval for a new log in milliseconds.
      *
-     * @see ProgressLogger#DEFAULT_LOG_INTERVAL
+     * @see it.unimi.dsi.mg4j.util.ProgressLogger#DEFAULT_LOG_INTERVAL
      */
     protected long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
+
+    /**
+     * The total number of instances to cluster.
+     */
+    protected final int instanceCount;
+
+    /**
+     * The total number of clusters created by clustering the instances.
+     */
+    protected int clusterCount;
 
     /**
      * Construct a new quality threshold clusterer.
@@ -59,28 +58,7 @@ public abstract class AbstractQTClusterer implements Clusterer {
                     + numberOfInstances + ") must not be negative");
         }
         clusterCount = numberOfInstances;
-        // Data elements are available only if k<clusterSizes[l]
-        clusters = new int[clusterCount][numberOfInstances];
-        // number of instances in each cluster.
-        clusterSizes = new int[clusterCount];
         instanceCount = numberOfInstances;
-
-        resetTmpClusters();
-        jVisited = new Int2BooleanAVLTreeMap();
-    }
-
-    /**
-     * Initialize instance index in clusters to value that is not supported.
-     */
-    protected final void resetTmpClusters() {
-        for (final int[] cluster : clusters) {
-            for (int i = 0; i < cluster.length; ++i) {
-                cluster[i] = Integer.MAX_VALUE;
-            }
-        }
-        for (int i = 0; i < clusterSizes.length; ++i) {
-            clusterSizes[i] = 0;
-        }
     }
 
     /**
@@ -124,56 +102,4 @@ public abstract class AbstractQTClusterer implements Clusterer {
         this.clustersCannotOverlap = cannotOverlap;
     }
 
-    /**
-     * Add an instance to a cluster.
-     *
-     * @param instanceIndex Index of the instance to add to the cluster.
-     * @param clusterIndex  Index of the cluster where to add the instance.
-     * @return true if instance appended to cluster, false otherwise
-     */
-    public final boolean addToCluster(final int instanceIndex,
-                                      final int clusterIndex) {
-        if (instanceIndex == Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("instance Index =="
-                + Integer.MAX_VALUE + " is not supported");
-        }
-
-        if (clusterIndex >= clusters.length) {
-            throw new IllegalArgumentException("Cluster index ("
-            + clusterIndex + ") must be < cluser length ("
-            + clusters.length + ")");
-        }
-
-        // return immediately if instance already in cluster;
-        for (int i = 0; i < clusterSizes[clusterIndex]; ++i) {
-            if (clusters[clusterIndex][i] == instanceIndex) {
-                return false;
-            }
-        }
-
-        final int lastInstanceIndex = clusterSizes[clusterIndex];
-        assert lastInstanceIndex < clusters[clusterIndex].length;
-
-        clusters[clusterIndex][lastInstanceIndex] = instanceIndex;
-        clusterSizes[clusterIndex] += 1;
-        return true;
-    }
-
-    /**
-     * Returns the list of clusters produced by clustering.
-     *
-     * @return A list of integer arrays, where each array represents a cluster
-     *         and contains the index of the instance that belongs to a given cluster.
-     */
-    public final List<int[]> getClusters() {
-        final List<int[]> result = new ArrayList<int[]>();
-        final int resultClusterCount = clusterCount;
-
-        for (int l = 0; l < resultClusterCount; ++l) {
-            final int[] trimmedCluster = new int[clusterSizes[l]]; // NOPMD
-            System.arraycopy(clusters[l], 0, trimmedCluster, 0, clusterSizes[l]);
-            result.add(trimmedCluster);
-        }
-        return result;
-    }
 }

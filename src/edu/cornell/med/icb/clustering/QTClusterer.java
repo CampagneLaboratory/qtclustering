@@ -36,33 +36,11 @@ import java.util.List;
  * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}).
  *
  */
-public final class QTClusterer implements Clusterer {
+public final class QTClusterer extends AbstractQTClusterer {
     /**
      * Used to log debug and informational messages.
      */
     private static final Logger LOGGER = Logger.getLogger(QTClusterer.class);
-
-    /**
-     * Indicate that clusters cannot overlap.
-     */
-    private boolean clustersCannotOverlap = true;
-
-    /**
-     * The time interval for a new log in milliseconds.
-     *
-     * @see it.unimi.dsi.mg4j.util.ProgressLogger#DEFAULT_LOG_INTERVAL
-     */
-    private long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
-
-    /**
-     * The total number of instances to cluster.
-     */
-    private final int instanceCount;
-
-    /**
-     * The total number of clusters created by clustering the instances.
-     */
-    private int clusterCount;
 
     /**
      * The list of clusters.
@@ -81,12 +59,7 @@ public final class QTClusterer implements Clusterer {
      * i.e., |G| where G is the set of instances
      */
     public QTClusterer(final int numberOfInstances) {
-        super();
-        if (numberOfInstances < 0) {
-            throw new IllegalArgumentException("Number of instances ("
-                    + numberOfInstances + ") must not be negative");
-        }
-        instanceCount = numberOfInstances;
+        super(numberOfInstances);
         clusters = new IntArrayList[instanceCount];
         tmpClusters = new IntArrayList[instanceCount];
         for (int i = 0; i < instanceCount; i++) {
@@ -96,51 +69,12 @@ public final class QTClusterer implements Clusterer {
     }
 
     /**
-     * Get the the progress logging interval.
-     *
-     * @return the logging interval in milliseconds.
-     */
-    public long getLogInterval() {
-        return logInterval;
-    }
-
-    /**
-     * Set the the progress logging interval.
-     *
-     * @param interval the logging interval in milliseconds.
-     */
-    public void setLogInterval(final long interval) {
-        this.logInterval = interval;
-    }
-
-    /**
-     * If clustersCannotOverlap is true, then clustering will produce clusters
-     * that do not overlap. If clustersCannotOverlap is false, overlapping is
-     * allowed, and some instances will be part of several clusters.
-     *
-     * @return whether or not clusters can overlap
-     */
-    public boolean isClustersCannotOverlap() {
-        return clustersCannotOverlap;
-    }
-
-    /**
-     * Indicate that clusters cannot overlap. If clustersCannotOverlap is true,
-     * then clustering will produce clusters that do not overlap. If
-     * clustersCannotOverlap is false, overlapping is allowed, and some
-     * instances will be part of several clusters.
-     *
-     * @param cannotOverlap Indicates whether or not clusters can overlap
-     */
-    public void setClustersCannotOverlap(final boolean cannotOverlap) {
-        clustersCannotOverlap = cannotOverlap;
-    }
-
-    /**
      * Groups instances into clusters. Returns the indices of the instances
      * that belong to a cluster as an int array in the list result.
      *
-     * @param calculator The distance calculator to
+     * @param calculator The
+     * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}
+     * that should be used when clustering
      * @param qualityThreshold The QT clustering algorithm quality threshold (d)
      * @return The list of clusters.
      */

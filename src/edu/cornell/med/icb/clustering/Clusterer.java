@@ -25,8 +25,10 @@ public interface Clusterer {
      * Groups instances into clusters. Returns the indices of the instances
      * that belong to a cluster as an int array in the list result.
      *
-     * @param calculator The distance calculator to
-     * @param qualityThreshold The clustering algorithm quality threshold.
+     * @param calculator The
+     * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}
+     * that should be used when clustering
+     * @param qualityThreshold The QT clustering algorithm quality threshold (d)
      * @return The list of clusters.
      */
     List<int[]> cluster(final SimilarityDistanceCalculator calculator,
