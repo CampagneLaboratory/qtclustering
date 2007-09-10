@@ -174,7 +174,7 @@ public final class QTClusterer extends AbstractQTClusterer {
             for (int i = 0; i < instanceCount; i++) {
                 final int size = tmpClusters[i].size();
                 if (LOGGER.isTraceEnabled() && size > 0) {
-                    LOGGER.debug("potential cluster " + i + ": "
+                    LOGGER.trace("potential cluster " + i + ": "
                             + ArrayUtils.toString(tmpClusters[i]));
                 }
                 if (size > maxCardinality) {
@@ -186,8 +186,8 @@ public final class QTClusterer extends AbstractQTClusterer {
             final IntArrayList selectedCluster =
                     tmpClusters[selectedClusterIndex];
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("adding " + selectedCluster.size()
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("adding " + selectedCluster.size()
                         + " instances to cluster " + clusterCount);
             }
             // and add that cluster to the final result
