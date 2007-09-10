@@ -58,14 +58,15 @@ public final class QTClusterer extends AbstractQTClusterer {
     private boolean logClusterProgress = true;
 
     /**
+     * Indicates that progress on the outer loop should be logged.
+     */
+    private boolean logOuterLoopProgress = true;
+
+    /**
      * Indicates that progress on the inner loop should be logged.
      */
     private boolean logInnerLoopProgress;
 
-    /**
-     * Indicates that progress on the outer loop should be logged.
-     */
-    private boolean logOuterLoopProgress;
 
     /**
      * Construct a new quality threshold clusterer.
@@ -75,9 +76,9 @@ public final class QTClusterer extends AbstractQTClusterer {
      */
     public QTClusterer(final int numberOfInstances) {
         super(numberOfInstances);
-        clusters = new IntArrayList[instanceCount];
-        tmpClusters = new IntArrayList[instanceCount];
-        for (int i = 0; i < instanceCount; i++) {
+        clusters = new IntArrayList[numberOfInstances];
+        tmpClusters = new IntArrayList[numberOfInstances];
+        for (int i = 0; i < numberOfInstances; i++) {
             clusters[i] = new IntArrayList();     // NOPMD
             tmpClusters[i] = new IntArrayList();  // NOPMD
         }
@@ -185,14 +186,14 @@ public final class QTClusterer extends AbstractQTClusterer {
                         cluster.add(notClustered.remove(minDistanceInstanceIndex));
                     }
                     if (logInnerLoopProgress) {
-                        innerLoopProgressLogger.lightUpdate();
+                        innerLoopProgressLogger.update();
                     }
                 }
                 if (logInnerLoopProgress) {
                     innerLoopProgressLogger.stop("Inner loop completed.");
                 }
                 if (logOuterLoopProgress) {
-                    outerLoopProgressLogger.lightUpdate();
+                    outerLoopProgressLogger.update();
                 }
             }
             if (logOuterLoopProgress) {
@@ -224,14 +225,19 @@ public final class QTClusterer extends AbstractQTClusterer {
             // and add that cluster to the final result
             clusters[clusterCount].addAll(selectedCluster);
 
-            // remove instances in the cluster C so they are no longer considered
+            // remove instances in cluster C so they are no longer considered
             instanceList.removeAll(selectedCluster);
 
             if (logClusterProgress) {
+                final int selectedClusterSize = selectedCluster.size();
                 int i = 0;
-                while (i < selectedCluster.size()) {
+                while (i < selectedClusterSize - 1) {
                     clusterProgressLogger.lightUpdate();
                     i++;
+                }
+                // make sure there is at least one "full" update per loop
+                if (i < selectedClusterSize) {
+                    clusterProgressLogger.update();
                 }
             }
 
