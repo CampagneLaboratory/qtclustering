@@ -276,12 +276,12 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
      */
     private boolean addToCluster(final int instanceIndex,
                                  final int clusterIndex) {
-        assert instanceIndex != Integer.MAX_VALUE :
-            "instance Index ==" + Integer.MAX_VALUE + " is not supported";
+        assert instanceIndex != Integer.MAX_VALUE
+                : "instance Index ==" + Integer.MAX_VALUE + " is not supported";
 
-        assert clusterIndex < clusters.length :
-            "Cluster index (" + clusterIndex + ") must be < cluser length ("
-                    + clusters.length + ")";
+        assert clusterIndex < clusters.length
+                : "Cluster index (" + clusterIndex
+                + ") must be < cluser length (" + clusters.length + ")";
 
         // return immediately if instance already in cluster;
         for (int i = 0; i < clusterSizes[clusterIndex]; ++i) {

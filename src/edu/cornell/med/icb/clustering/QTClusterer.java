@@ -53,6 +53,21 @@ public final class QTClusterer extends AbstractQTClusterer {
     private final IntArrayList[] tmpClusters;
 
     /**
+     * Indicates that progress on cluster being assembled.
+     */
+    private boolean logClusterProgress = true;
+
+    /**
+     * Indicates that progress on the inner loop should be logged.
+     */
+    private boolean logInnerLoopProgress;
+
+    /**
+     * Indicates that progress on the outer loop should be logged.
+     */
+    private boolean logOuterLoopProgress;
+
+    /**
      * Construct a new quality threshold clusterer.
      *
      * @param numberOfInstances The number of instances to cluster.
@@ -115,9 +130,12 @@ public final class QTClusterer extends AbstractQTClusterer {
                 tmpClusters[i].clear();
             }
 
-            outerLoopProgressLogger.expectedUpdates = instanceList.size();
-            outerLoopProgressLogger.start("Entering outer loop for "
-                    + instanceList.size() + " iterations");
+            if (logOuterLoopProgress) {
+                outerLoopProgressLogger.expectedUpdates = instanceList.size();
+                outerLoopProgressLogger.start("Entering outer loop for "
+                        + instanceList.size() + " iterations");
+            }
+
             // foreach i in G (instance list)
             for (int i = 0; i < instanceList.size(); i++) {
                 @SuppressWarnings("unchecked")
@@ -127,9 +145,12 @@ public final class QTClusterer extends AbstractQTClusterer {
                 // add the first instance to the next cluster
                 tmpClusters[i].add(notClustered.remove(i));
 
-                innerLoopProgressLogger.expectedUpdates = notClustered.size();
-                innerLoopProgressLogger.start("Entering inner loop for "
-                        +  notClustered.size() + " iterations");
+                if (logInnerLoopProgress) {
+                    innerLoopProgressLogger.expectedUpdates =
+                            notClustered.size();
+                    innerLoopProgressLogger.start("Entering inner loop for "
+                            +  notClustered.size() + " iterations");
+                }
 
                 // cluster the remaining instances to find the maximum
                 // cardinality find instance j such that distance i,j minimum
@@ -141,10 +162,12 @@ public final class QTClusterer extends AbstractQTClusterer {
                     double minDistance = Double.MAX_VALUE;
                     int minDistanceInstanceIndex = 0;
                     int instanceIndex = 0;
+                    final IntArrayList cluster = tmpClusters[i];
+                    final int[] clusterArray = cluster.elements();
+                    final int clusterSize = cluster.size();
                     for (final int instance : notClustered) {
-                        final double newDistance =
-                                calculator.distance(tmpClusters[i].elements(),
-                                        tmpClusters[i].size(), instance);
+                        final double newDistance = calculator.distance(
+                                clusterArray, clusterSize, instance);
 
                         if (newDistance <= minDistance) {
                             minDistance = newDistance;
@@ -159,14 +182,22 @@ public final class QTClusterer extends AbstractQTClusterer {
                     if (minDistance > qualityThreshold) {
                         done = true;
                     } else {
-                        tmpClusters[i].add(notClustered.remove(minDistanceInstanceIndex));
+                        cluster.add(notClustered.remove(minDistanceInstanceIndex));
                     }
-                    innerLoopProgressLogger.lightUpdate();
+                    if (logInnerLoopProgress) {
+                        innerLoopProgressLogger.lightUpdate();
+                    }
                 }
-                innerLoopProgressLogger.stop("Inner loop completed.");
-                outerLoopProgressLogger.lightUpdate();
+                if (logInnerLoopProgress) {
+                    innerLoopProgressLogger.stop("Inner loop completed.");
+                }
+                if (logOuterLoopProgress) {
+                    outerLoopProgressLogger.lightUpdate();
+                }
             }
-            outerLoopProgressLogger.stop("Outer loop completed.");
+            if (logOuterLoopProgress) {
+                outerLoopProgressLogger.stop("Outer loop completed.");
+            }
 
             // identify cluster (set C) with maximum cardinality
             int maxCardinality = 0;
@@ -196,11 +227,17 @@ public final class QTClusterer extends AbstractQTClusterer {
             // remove instances in the cluster C so they are no longer considered
             instanceList.removeAll(selectedCluster);
 
-            for (int i = 0; i < selectedCluster.size(); i++) {
-                clusterProgressLogger.lightUpdate();
+            if (logClusterProgress) {
+                int i = 0;
+                while (i < selectedCluster.size()) {
+                    clusterProgressLogger.lightUpdate();
+                    i++;
+                }
             }
 
+            // we just created a new cluster
             clusterCount++;
+
             // next iteration is over (G - C)
         }
 
@@ -221,5 +258,56 @@ public final class QTClusterer extends AbstractQTClusterer {
             result.add(clusters[i].toIntArray());
         }
         return result;
+    }
+
+    /**
+     * Is progress on clusters being logged?
+     * @return true if logging is enabled for clusters being built.
+     */
+    public boolean isLogClusterProgress() {
+        return logClusterProgress;
+    }
+
+    /**
+     * Should progress on the clusters be logged?
+     * @param value indicates whether or not logging should be enabled for
+     * clusters being built.
+     */
+    public void setLogClusterProgress(final boolean value) {
+        this.logClusterProgress = value;
+    }
+
+    /**
+     * Is progress on the inner loop being logged?
+     * @return true if logging is enabled for the inner loop
+     */
+    public boolean isLogInnerLoopProgress() {
+        return logInnerLoopProgress;
+    }
+
+    /**
+     * Should progress on the inner loop be logged?
+     * @param value indicates whether or not logging should be enabled for
+     * the inner loop
+     */
+    public void setLogInnerLoopProgress(final boolean value) {
+        this.logInnerLoopProgress = value;
+    }
+
+    /**
+     * Is progress on the outer loop being logged?
+     * @return true if logging is enabled for the outer loop
+     */
+    public boolean isLogOuterLoopProgress() {
+        return logOuterLoopProgress;
+    }
+
+    /**
+     * Should progress on the outer loop be logged?
+     * @param value indicates whether or not logging should be enabled for
+     * the outer loop
+     */
+    public void setLogOuterLoopProgress(final boolean value) {
+        this.logOuterLoopProgress = value;
     }
 }
