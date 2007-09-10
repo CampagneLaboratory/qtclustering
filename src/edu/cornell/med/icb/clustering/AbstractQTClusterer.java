@@ -21,7 +21,7 @@ package edu.cornell.med.icb.clustering;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 
 /**
- * Base class for clustering implementationsx.
+ * Base class for clustering implementations.
  */
 public abstract class AbstractQTClusterer implements Clusterer {
     /**
@@ -101,5 +101,4 @@ public abstract class AbstractQTClusterer implements Clusterer {
     public final void setClustersCannotOverlap(final boolean cannotOverlap) {
         this.clustersCannotOverlap = cannotOverlap;
     }
-
 }

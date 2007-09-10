@@ -20,6 +20,13 @@ package edu.cornell.med.icb.clustering;
 
 import java.util.List;
 
+/**
+ * Common interface definition for clustering algorithms.  Clustering is the
+ * classification of objects into different groups, or more precisely,
+ * the partitioning of a data set into subsets (clusters), so that the
+ * data in each subset (ideally) share some common trait - often proximity
+ * according to some defined distance measure.
+ */
 public interface Clusterer {
     /**
      * Groups instances into clusters. Returns the indices of the instances

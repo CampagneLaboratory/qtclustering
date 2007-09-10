@@ -18,6 +18,9 @@
 
 package edu.cornell.med.icb.clustering;
 
+/**
+ * Indicates a problem while clustering objects.
+ */
 public class ClusteringException extends RuntimeException {
     static final long serialVersionUID = 1L;
 

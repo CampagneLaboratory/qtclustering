@@ -18,14 +18,14 @@
 
 package edu.cornell.med.icb.clustering;
 
-import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanAVLTreeMap;
+import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
-import org.apache.log4j.Logger;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implements the QT Clustering algorithm. (QT stands for Quality
@@ -49,8 +49,22 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
      */
     private static final Logger LOGGER =
             Logger.getLogger(RecursiveQTClusterer.class);
+
+    /**
+     * The list of clusters.
+     */
     private final int[][] clusters;
+
+    /**
+     * The corresponding sizes of clusters in the {@link #clusters} list.
+     */
     private final int[] clusterSizes;
+
+    /**
+     * A list of the instances that have been already considered for
+     * a cluster.  If an instance j has already been "visited", there
+     * is no need to recalculate it's relative distance.
+     */
     private final Int2BooleanMap jVisited;
 
     /**
@@ -71,10 +85,10 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
     }
 
     /**
-     * Groups instances into clusters. Returns the indices of the instances
-     * that belong to a cluster as an int array in the list result.
+     * Groups instances into clusters. Returns the indices of the instances that
+     * belong to a cluster as an int array in the list result.
      *
-     * @param calculator       The distance calculator to
+     * @param calculator The distance calculator to
      * @param qualityThreshold The QT clustering algorithm quality threshold.
      * @return The list of clusters.
      */
@@ -107,8 +121,6 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
      * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}
      * that should be used when clustering
      * @param qualityThreshold The QT clustering algorithm quality threshold (d)
-     * @param ignoreList
-     * @param instances
      * @param progressLogger A {@link it.unimi.dsi.mg4j.util.ProgressLogger}
      * that should used to update clustering progress.
      */
@@ -137,11 +149,13 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
         }
 
         final ProgressLogger innerLoopProgressLogger =
-                new ProgressLogger(LOGGER, logInterval, "inner loop iterations");
+                new ProgressLogger(LOGGER, logInterval,
+                        "inner loop iterations");
         innerLoopProgressLogger.displayFreeMemory = false;
 
         final ProgressLogger outerLoopProgressLogger =
-                new ProgressLogger(LOGGER, logInterval, "outer loop iterations");
+                new ProgressLogger(LOGGER, logInterval,
+                        "outer loop iterations");
         outerLoopProgressLogger.displayFreeMemory = false;
         outerLoopProgressLogger.expectedUpdates = instanceCount;
         outerLoopProgressLogger.start();
@@ -188,10 +202,14 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
                             jVisited.put(minDistanceInstanceIndex, true);
                             if (!added) {
                                 done = true;
-                                LOGGER.info(String.format("Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n", minDistanceInstanceIndex, i, distance_i_j));
+                                LOGGER.info(String.format(
+                                        "Could not add instance minDistanceInstanceIndex=%d to cluster %d, distance was %f\n",
+                                        minDistanceInstanceIndex, i,
+                                        distance_i_j));
 
                             } else {
-                                innerLoopProgressLogger.expectedUpdates = instanceCount;
+                                innerLoopProgressLogger.expectedUpdates =
+                                        instanceCount;
                             }
                         }
                     }
@@ -253,21 +271,17 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
      * Add an instance to a cluster.
      *
      * @param instanceIndex Index of the instance to add to the cluster.
-     * @param clusterIndex  Index of the cluster where to add the instance.
+     * @param clusterIndex Index of the cluster where to add the instance.
      * @return true if instance appended to cluster, false otherwise
      */
     private boolean addToCluster(final int instanceIndex,
-                                      final int clusterIndex) {
-        if (instanceIndex == Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("instance Index =="
-                + Integer.MAX_VALUE + " is not supported");
-        }
+                                 final int clusterIndex) {
+        assert instanceIndex != Integer.MAX_VALUE :
+            "instance Index ==" + Integer.MAX_VALUE + " is not supported";
 
-        if (clusterIndex >= clusters.length) {
-            throw new IllegalArgumentException("Cluster index ("
-            + clusterIndex + ") must be < cluser length ("
-            + clusters.length + ")");
-        }
+        assert clusterIndex < clusters.length :
+            "Cluster index (" + clusterIndex + ") must be < cluser length ("
+                    + clusters.length + ")";
 
         // return immediately if instance already in cluster;
         for (int i = 0; i < clusterSizes[clusterIndex]; ++i) {
@@ -288,15 +302,17 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
      * Returns the list of clusters produced by clustering.
      *
      * @return A list of integer arrays, where each array represents a cluster
-     *         and contains the index of the instance that belongs to a given cluster.
+     *         and contains the index of the instance that belongs to a given
+     *         cluster.
      */
-    public final List<int[]> getClusters() {
+    public List<int[]> getClusters() {
         final List<int[]> result = new ArrayList<int[]>();
         final int resultClusterCount = clusterCount;
 
         for (int l = 0; l < resultClusterCount; ++l) {
             final int[] trimmedCluster = new int[clusterSizes[l]]; // NOPMD
-            System.arraycopy(clusters[l], 0, trimmedCluster, 0, clusterSizes[l]);
+            System.arraycopy(clusters[l], 0, trimmedCluster, 0,
+                    clusterSizes[l]);
             result.add(trimmedCluster);
         }
         return result;
