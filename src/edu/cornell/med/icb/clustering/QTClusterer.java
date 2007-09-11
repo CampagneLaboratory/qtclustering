@@ -73,7 +73,7 @@ public final class QTClusterer extends AbstractQTClusterer {
     /**
      * Team used to execute the clustering inner loops with multiple threads.
      */
-    private ParallelTeam parallelTeam;
+    private final ParallelTeam parallelTeam;
 
     /**
      * Construct a new quality threshold clusterer.
