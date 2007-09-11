@@ -30,6 +30,13 @@ package edu.cornell.med.icb.clustering;
 public abstract class MaxLinkageDistanceCalculator
         implements SimilarityDistanceCalculator {
     /**
+     * Representation of the specified floating-point value according to the
+     * IEEE 754 floating-point "double format" bit layout.
+      */
+     private static long negativeZeroDoubleBits =
+             Double.doubleToLongBits(-0.0d);
+
+    /**
      * Returns the distance between an instance and the instances in a cluster.
      * The default implementation calculates maximum linkage (max of the
      * distances between instances in the cluster and instanceIndex).
@@ -45,10 +52,20 @@ public abstract class MaxLinkageDistanceCalculator
         double maxDistance = Double.MIN_VALUE;
 
         for (int i = 0; i < clusterSize; ++i) {
-            final int anInstance = cluster[i];
+            final double a = distance(cluster[i], instanceIndex);
+            final double b = maxDistance;
 
-            maxDistance =
-                    Math.max(distance(anInstance, instanceIndex), maxDistance);
+            // This code is inlined from java.lang.Math.max(a, b)
+            if (a != a) {         	// a is NaN
+                maxDistance = a;
+            } else if (a == 0.0d && b == 0.0d
+                    && Double.doubleToLongBits(a) == negativeZeroDoubleBits) {
+                maxDistance = b;
+            } else if (a >= b) {
+                maxDistance = a;
+            } else {
+                maxDistance = b;
+            }
         }
 
         return maxDistance;
