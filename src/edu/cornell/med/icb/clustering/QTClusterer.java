@@ -18,6 +18,9 @@
 
 package edu.cornell.med.icb.clustering;
 
+import edu.rit.pj.IntegerForLoop;
+import edu.rit.pj.ParallelRegion;
+import edu.rit.pj.ParallelTeam;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 import org.apache.commons.lang.ArrayUtils;
@@ -67,6 +70,10 @@ public final class QTClusterer extends AbstractQTClusterer {
      */
     private boolean logInnerLoopProgress;
 
+    /**
+     * Team used to execute the clustering inner loops with multiple threads.
+     */
+    private ParallelTeam parallelTeam;
 
     /**
      * Construct a new quality threshold clusterer.
@@ -75,7 +82,32 @@ public final class QTClusterer extends AbstractQTClusterer {
      * i.e., |G| where G is the set of instances
      */
     public QTClusterer(final int numberOfInstances) {
+        this(numberOfInstances, ParallelTeam.getDefaultThreadCount());
+    }
+
+    /**
+     * Construct a new quality threshold clusterer.
+     *
+     * @param numberOfInstances The number of instances to cluster.
+     * i.e., |G| where G is the set of instances
+     * @param numberOfThreads Number of threads to use when clustering.
+     */
+    public QTClusterer(final int numberOfInstances,
+                       final int numberOfThreads) {
+        this(numberOfInstances, new ParallelTeam(numberOfThreads));
+    }
+
+    /**
+     * Construct a new quality threshold clusterer.
+     *
+     * @param numberOfInstances The number of instances to cluster.
+     * i.e., |G| where G is the set of instances
+     * @param team The parallel team to use when clustering.
+     */
+    public QTClusterer(final int numberOfInstances,
+                       final ParallelTeam team) {
         super(numberOfInstances);
+        parallelTeam = team;
         clusters = new IntArrayList[numberOfInstances];
         tmpClusters = new IntArrayList[numberOfInstances];
         for (int i = 0; i < numberOfInstances; i++) {
@@ -101,8 +133,9 @@ public final class QTClusterer extends AbstractQTClusterer {
                 new ProgressLogger(LOGGER, logInterval, "instances clustered");
         clusterProgressLogger.displayFreeMemory = true;
         clusterProgressLogger.expectedUpdates = instanceCount;
-        clusterProgressLogger.start("Starting to cluster "
-                + instanceCount + " instances");
+        clusterProgressLogger.start("Starting to cluster " + instanceCount
+                + " instances using " + parallelTeam.getThreadCount()
+                + " threads.");
 
         // reset cluster results
         clusterCount = 0;
@@ -124,128 +157,157 @@ public final class QTClusterer extends AbstractQTClusterer {
                 new ProgressLogger(LOGGER, logInterval, "outer loop iterations");
         outerLoopProgressLogger.displayFreeMemory = false;
 
-        // loop over the instances until they have all been added to a cluster
-        while (!instanceList.isEmpty()) {
-            // cluster the remaining instances to find the maximum cardinality
-            for (int i = 0; i < instanceCount; i++) {
-                tmpClusters[i].clear();
-            }
-
-            if (logOuterLoopProgress) {
-                outerLoopProgressLogger.expectedUpdates = instanceList.size();
-                outerLoopProgressLogger.start("Entering outer loop for "
-                        + instanceList.size() + " iterations");
-            }
-
-            // foreach i in G (instance list)
-            for (int i = 0; i < instanceList.size(); i++) {
-                @SuppressWarnings("unchecked")
-                final LinkedList<Integer> notClustered =
-                        (LinkedList<Integer>) instanceList.clone();
-
-                // add the first instance to the next cluster
-                tmpClusters[i].add(notClustered.remove(i));
-
-                if (logInnerLoopProgress) {
-                    innerLoopProgressLogger.expectedUpdates =
-                            notClustered.size();
-                    innerLoopProgressLogger.start("Entering inner loop for "
-                            +  notClustered.size() + " iterations");
+        try {
+            // loop over instances until they have all been added to a cluster
+            while (!instanceList.isEmpty()) {
+                // cluster remaining instances to find the maximum cardinality
+                for (int i = 0; i < instanceCount; i++) {
+                    tmpClusters[i].clear();
                 }
 
-                // cluster the remaining instances to find the maximum
-                // cardinality find instance j such that distance i,j minimum
-                boolean done = false;
-                while (!done && !notClustered.isEmpty()) {
-                    // find the node that has minimum distance between the
-                    // current cluster and the instances that have not yet
-                    // been clustered
-                    double minDistance = Double.MAX_VALUE;
-                    int minDistanceInstanceIndex = 0;
-                    int instanceIndex = 0;
-                    final IntArrayList cluster = tmpClusters[i];
-                    final int[] clusterArray = cluster.elements();
-                    final int clusterSize = cluster.size();
-                    for (final int instance : notClustered) {
-                        final double newDistance = calculator.distance(
-                                clusterArray, clusterSize, instance);
-
-                        if (newDistance <= minDistance) {
-                            minDistance = newDistance;
-                            minDistanceInstanceIndex = instanceIndex;
-                        }
-                        instanceIndex++;
-                    }
-
-                    // grow clusters until min distance between new instance
-                    // and cluster reaches quality threshold
-                    // if (diameter(Ai U {j}) > d)
-                    if (minDistance > qualityThreshold) {
-                        done = true;
-                    } else {
-                        cluster.add(notClustered.remove(minDistanceInstanceIndex));
-                    }
-                    if (logInnerLoopProgress) {
-                        innerLoopProgressLogger.update();
-                    }
-                }
-                if (logInnerLoopProgress) {
-                    innerLoopProgressLogger.stop("Inner loop completed.");
-                }
                 if (logOuterLoopProgress) {
-                    outerLoopProgressLogger.update();
+                    outerLoopProgressLogger.expectedUpdates = instanceList.size();
+                    outerLoopProgressLogger.start("Entering outer loop for "
+                            + instanceList.size() + " iterations");
                 }
-            }
-            if (logOuterLoopProgress) {
-                outerLoopProgressLogger.stop("Outer loop completed.");
-            }
 
-            // identify cluster (set C) with maximum cardinality
-            int maxCardinality = 0;
-            int selectedClusterIndex = -1;
-            for (int i = 0; i < instanceCount; i++) {
-                final int size = tmpClusters[i].size();
-                if (LOGGER.isTraceEnabled() && size > 0) {
-                    LOGGER.trace("potential cluster " + i + ": "
-                            + ArrayUtils.toString(tmpClusters[i]));
+                // foreach i in G (instance list)
+                // find instance j such that distance i,j minimum
+                parallelTeam.execute(new ParallelRegion() {
+                    @Override
+                    public void run() throws Exception {
+                        // each thread will populate a different portion of
+                        // the "tmpCluster" array so we shouldn't need to
+                        // worry about concurrent access
+                        execute(0, instanceList.size() - 1, new IntegerForLoop() {
+                            @Override
+                            public void run(final int first, final int last) {
+                                if (LOGGER.isDebugEnabled()) {
+                                    LOGGER.debug("first = " + first
+                                            + ", last = " + last);
+                                }
+                                for (int i = first; i <= last; i++) {
+                                    @SuppressWarnings("unchecked")
+                                    final LinkedList<Integer> notClustered =
+                                            (LinkedList<Integer>) instanceList.clone();
+
+                                    // add the first instance to the next cluster
+                                    tmpClusters[i].add(notClustered.remove(i));
+
+                                    if (logInnerLoopProgress) {
+                                        innerLoopProgressLogger.expectedUpdates =
+                                                notClustered.size();
+                                        innerLoopProgressLogger.start("Entering inner loop for "
+                                                +  notClustered.size() + " iterations");
+                                    }
+
+                                    // cluster the remaining instances to find the maximum
+                                    // cardinality find instance j such that distance i,j minimum
+                                    boolean done = false;
+                                    while (!done && !notClustered.isEmpty()) {
+                                        // find the node that has minimum distance between the
+                                        // current cluster and the instances that have not yet
+                                        // been clustered
+                                        double minDistance = Double.MAX_VALUE;
+                                        int minDistanceInstanceIndex = 0;
+                                        int instanceIndex = 0;
+                                        final IntArrayList cluster = tmpClusters[i];
+                                        final int[] clusterArray = cluster.elements();
+                                        final int clusterSize = cluster.size();
+                                        for (final int instance : notClustered) {
+                                            final double newDistance = calculator.distance(
+                                                    clusterArray, clusterSize, instance);
+
+                                            if (newDistance <= minDistance) {
+                                                minDistance = newDistance;
+                                                minDistanceInstanceIndex = instanceIndex;
+                                            }
+                                            instanceIndex++;
+                                        }
+
+                                        // grow clusters until min distance
+                                        // between new instance and cluster
+                                        // reaches quality threshold
+                                        // if (diameter(Ai U {j}) > d)
+                                        if (minDistance > qualityThreshold) {
+                                            done = true;
+                                        } else {
+                                            cluster.add(notClustered.remove(minDistanceInstanceIndex));
+                                        }
+                                        if (logInnerLoopProgress) {
+                                            innerLoopProgressLogger.update();
+                                        }
+                                    }
+                                    if (logInnerLoopProgress) {
+                                        innerLoopProgressLogger.stop("Inner loop completed.");
+                                    }
+                                    if (logOuterLoopProgress) {
+                                        outerLoopProgressLogger.update();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+
+                if (logOuterLoopProgress) {
+                    outerLoopProgressLogger.stop("Outer loop completed.");
                 }
-                if (size > maxCardinality) {
-                    maxCardinality = size;
-                    selectedClusterIndex = i;
+
+                // identify cluster (set C) with maximum cardinality
+                int maxCardinality = 0;
+                int selectedClusterIndex = -1;
+                for (int i = 0; i < instanceCount; i++) {
+                    final int size = tmpClusters[i].size();
+                    if (LOGGER.isTraceEnabled() && size > 0) {
+                        LOGGER.trace("potential cluster " + i + ": "
+                                + ArrayUtils.toString(tmpClusters[i]));
+                    }
+                    if (size > maxCardinality) {
+                        maxCardinality = size;
+                        selectedClusterIndex = i;
+                    }
                 }
-            }
 
-            final IntArrayList selectedCluster =
-                    tmpClusters[selectedClusterIndex];
+                final IntArrayList selectedCluster =
+                        tmpClusters[selectedClusterIndex];
 
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("adding " + selectedCluster.size()
-                        + " instances to cluster " + clusterCount);
-            }
-            // and add that cluster to the final result
-            clusters[clusterCount].addAll(selectedCluster);
-
-            // remove instances in cluster C so they are no longer considered
-            instanceList.removeAll(selectedCluster);
-
-            if (logClusterProgress) {
-                final int selectedClusterSize = selectedCluster.size();
-                int i = 0;
-                while (i < selectedClusterSize - 1) {
-                    clusterProgressLogger.lightUpdate();
-                    i++;
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("adding " + selectedCluster.size()
+                            + " instances to cluster " + clusterCount);
                 }
-                // make sure there is at least one "full" update per loop
-                if (i < selectedClusterSize) {
-                    clusterProgressLogger.update();
+                // and add that cluster to the final result
+                clusters[clusterCount].addAll(selectedCluster);
+
+                // remove instances in cluster C so they are no longer considered
+                instanceList.removeAll(selectedCluster);
+
+                if (logClusterProgress) {
+                    final int selectedClusterSize = selectedCluster.size();
+                    int i = 0;
+                    while (i < selectedClusterSize - 1) {
+                        clusterProgressLogger.lightUpdate();
+                        i++;
+                    }
+                    // make sure there is at least one "full" update per loop
+                    if (i < selectedClusterSize) {
+                        clusterProgressLogger.update();
+                    }
                 }
+
+                // we just created a new cluster
+                clusterCount++;
+
+                // next iteration is over (G - C)
             }
-
-            // we just created a new cluster
-            clusterCount++;
-
-            // next iteration is over (G - C)
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new ClusteringException(e);
+            }
         }
+
 
         clusterProgressLogger.stop("Clustering completed.");
         return getClusters();

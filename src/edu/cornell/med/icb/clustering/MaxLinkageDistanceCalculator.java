@@ -56,7 +56,7 @@ public abstract class MaxLinkageDistanceCalculator
             final double b = maxDistance;
 
             // This code is inlined from java.lang.Math.max(a, b)
-            if (a != a) {         	// a is NaN
+            if (a != a) {             // a is NaN
                 maxDistance = a;
             } else if (a == 0.0d && b == 0.0d
                     && Double.doubleToLongBits(a) == negativeZeroDoubleBits) {
