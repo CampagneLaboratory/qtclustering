@@ -25,11 +25,6 @@ import it.unimi.dsi.mg4j.util.ProgressLogger;
  */
 public abstract class AbstractQTClusterer implements Clusterer {
     /**
-     * Indicate that clusters cannot overlap.
-     */
-    protected boolean clustersCannotOverlap = true;
-
-    /**
      * The time interval for a new log in milliseconds.
      *
      * @see it.unimi.dsi.mg4j.util.ProgressLogger#DEFAULT_LOG_INTERVAL
@@ -77,28 +72,5 @@ public abstract class AbstractQTClusterer implements Clusterer {
      */
     public final void setLogInterval(final long interval) {
         this.logInterval = interval;
-    }
-
-    /**
-     * If clustersCannotOverlap is true, then clustering will produce clusters
-     * that do not overlap. If clustersCannotOverlap is false, overlapping is
-     * allowed, and some instances will be part of several clusters.
-     *
-     * @return whether or not clusters can overlap
-     */
-    public final boolean isClustersCannotOverlap() {
-        return clustersCannotOverlap;
-    }
-
-    /**
-     * Indicate that clusters cannot overlap. If clustersCannotOverlap is true,
-     * then clustering will produce clusters that do not overlap. If
-     * clustersCannotOverlap is false, overlapping is allowed, and some
-     * instances will be part of several clusters.
-     *
-     * @param cannotOverlap Indicates whether or not clusters can overlap
-     */
-    public final void setClustersCannotOverlap(final boolean cannotOverlap) {
-        this.clustersCannotOverlap = cannotOverlap;
     }
 }

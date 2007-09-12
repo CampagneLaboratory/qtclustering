@@ -307,8 +307,8 @@ public final class TestQTClusterer {
                 }
                 LOGGER.debug(j + ":" + ArrayUtils.toString(result));
                 final int[] expectedResult = expectedCluster.get(j);
-                assertTrue("Cluster " + j + "with threshold " + i
-                        + "does not match expected",
+                assertTrue("Cluster " + j + " with threshold " + i
+                        + " does not match expected",
                         ArrayUtils.isEquals(expectedResult, result));
                 j++;
             }

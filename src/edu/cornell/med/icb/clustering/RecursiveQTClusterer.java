@@ -162,7 +162,7 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
 
         for (int i = 0; i < instanceCount; ++i) { // i : cluster index
             // ignore instance i if part of previously selected clusters.
-            if (!clustersCannotOverlap || !ignoreList.get(i)) {
+            if (!ignoreList.get(i)) {
                 boolean done = false;
                 jVisited.clear();
                 addToCluster(i, i);
@@ -193,8 +193,7 @@ public final class RecursiveQTClusterer extends AbstractQTClusterer {
                     if (distance_i_j > qualityThreshold) {
                         done = true;
                     } else {
-                        if (clustersCannotOverlap
-                                && ignoreList.get(minDistanceInstanceIndex)) {
+                        if (ignoreList.get(minDistanceInstanceIndex)) {
                             done = true;
                         } else {
                             final boolean added =

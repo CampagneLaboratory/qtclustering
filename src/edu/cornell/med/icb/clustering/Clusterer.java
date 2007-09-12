@@ -48,24 +48,4 @@ public interface Clusterer {
      * and contains the index of the instance that belongs to a given cluster.
      */
     List<int[]> getClusters();
-
-    /**
-     * Indicate that clusters cannot overlap. If clustersCannotOverlap is true,
-     * then clustering will produce clusters that do not overlap. If
-     * clustersCannotOverlap is false, overlapping is allowed, and some
-     * instances will be part of several clusters.
-     *
-     * @param cannotOverlap Indicates whether or not clusters can overlap
-     */
-    void setClustersCannotOverlap(final boolean cannotOverlap);
-
-    /**
-     * If clustersCannotOverlap is true, then clustering will produce
-     * clusters that do not overlap. If clustersCannotOverlap is false,
-     * overlapping is allowed, and some instances will be part of
-     * several clusters.
-     *
-     * @return whether or not clusters can overlap
-     */
-    boolean isClustersCannotOverlap();
 }
