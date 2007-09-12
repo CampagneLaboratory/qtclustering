@@ -21,9 +21,8 @@ package edu.cornell.med.icb.clustering;
 /**
  * Indicates a problem while clustering objects.
  */
+@SuppressWarnings("serial")
 public class ClusteringException extends RuntimeException {
-    static final long serialVersionUID = 1L;
-
     /**
      * Constructs a new runtime exception with <code>null</code> as its detail
      * message.  The cause is not initialized, and may subsequently be

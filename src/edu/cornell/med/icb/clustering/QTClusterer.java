@@ -39,11 +39,28 @@ import java.util.List;
  * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}).
  *
  */
-public final class QTClusterer extends AbstractQTClusterer {
+public final class QTClusterer implements Clusterer {
     /**
      * Used to log debug and informational messages.
      */
     private static final Logger LOGGER = Logger.getLogger(QTClusterer.class);
+
+    /**
+     * The time interval for a new log in milliseconds.
+     *
+     * @see it.unimi.dsi.mg4j.util.ProgressLogger#DEFAULT_LOG_INTERVAL
+     */
+    private long logInterval = ProgressLogger.DEFAULT_LOG_INTERVAL;
+
+    /**
+     * The total number of instances to cluster.
+     */
+    private final int instanceCount;
+
+    /**
+     * The total number of clusters created by clustering the instances.
+     */
+    private int clusterCount;
 
     /**
      * The list of clusters.
@@ -108,7 +125,13 @@ public final class QTClusterer extends AbstractQTClusterer {
      */
     public QTClusterer(final int numberOfInstances,
                        final ParallelTeam team) {
-        super(numberOfInstances);
+        super();
+        if (numberOfInstances < 0) {
+            throw new IllegalArgumentException("Number of instances ("
+                    + numberOfInstances + ") must not be negative");
+        }
+
+        instanceCount = numberOfInstances;
         parallelTeam = team;
         clusters = new IntArrayList[numberOfInstances];
         tmpClusters = new IntArrayList[numberOfInstances];
@@ -380,4 +403,23 @@ public final class QTClusterer extends AbstractQTClusterer {
     public void setLogOuterLoopProgress(final boolean value) {
         this.logOuterLoopProgress = value;
     }
+
+    /**
+     * Get the the progress logging interval.
+     *
+     * @return the logging interval in milliseconds.
+     */
+    public long getLogInterval() {
+        return logInterval;
+    }
+
+    /**
+     * Set the the progress logging interval.
+     *
+     * @param interval the logging interval in milliseconds.
+     */
+    public void setLogInterval(final long interval) {
+        this.logInterval = interval;
+    }
+
 }
