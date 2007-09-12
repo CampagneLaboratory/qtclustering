@@ -136,8 +136,8 @@ public final class QTClusterer implements Clusterer {
         clusters = new IntArrayList[numberOfInstances];
         tmpClusters = new IntArrayList[numberOfInstances];
         for (int i = 0; i < numberOfInstances; i++) {
-            clusters[i] = new IntArrayList();     // NOPMD
-            tmpClusters[i] = new IntArrayList();  // NOPMD
+            clusters[i] = new IntArrayList();                        // NOPMD
+            tmpClusters[i] = new IntArrayList();                     // NOPMD
         }
     }
 
@@ -198,9 +198,9 @@ public final class QTClusterer implements Clusterer {
 
                 // foreach i in G (instance list)
                 // find instance j such that distance i,j minimum
-                parallelTeam.execute(new ParallelRegion() {
+                parallelTeam.execute(new ParallelRegion() {          // NOPMD
                     @Override
-                    public void run() throws Exception {
+                    public void run() throws Exception {             // NOPMD
                         // each thread will populate a different portion of
                         // the "tmpCluster" array so we shouldn't need to
                         // worry about concurrent access
