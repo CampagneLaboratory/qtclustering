@@ -270,7 +270,9 @@
 
     <target name="cobertura-setup">
         <mkdir dir="${cobertura-classes}"/>
+<!-- TODO: there seems to be an issue with cobertura and pj - tests are failing when cobertura is enabled
         <property name="with-cobertura" value="true"/>
+-->
     </target>
 
     <target name="cobertura-instrument" if="with-cobertura">
@@ -283,7 +285,7 @@
         </cobertura-instrument>
     </target>
 
-    <target name="cobertura-report">
+    <target name="cobertura-report" if="with-cobertura">
         <cobertura-report format="html" destdir="${test-results}/html/cobertura">
             <fileset dir="${src}"/>
         </cobertura-report>
