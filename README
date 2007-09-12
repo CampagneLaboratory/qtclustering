@@ -4,14 +4,21 @@ partitioning of a data set into subsets (clusters), so that the data in
 each subset (ideally) share some common trait - often proximity according
 to some defined distance measure.
 
-The clustering library requires Java 5 or better and the fastutil
-(http://fastutil.dsi.unimi.it/) library.  The binary distribution of
-the clustering library contains two jar files described as follows:
+The clustering library requires Java 5 or better and the following libraries:
 
-  - clustering.jar        includes all the external classes needed to run
-                          (i.e., fastutil)
-  - clustering-core.jar   includes only the project classes and will require a
-                          fastutil.jar to use in your own projects.
+  - Apache Commons Lang                    http://commons.apache.org/lang/
+  - Apache log4j                           http://logging.apache.org/log4j/
+  - fastutil                               http://fastutil.dsi.unimi.it/
+  - MG4J (Managing Gigabytes for Java)     http://mg4j.dsi.unimi.it/
+  - Parallel Java Library (PJ)             http://www.cs.rit.edu/~ark/pj.shtml
+
+The binary distribution of the clustering library contains two jar files
+described as follows:
+
+  - qtclustering.jar      includes all the external classes needed to run
+                          (i.e., fastutil, log4j, etc.)
+  - qtclustering-core.jar includes only the project classes and will require a
+                          the libraies listed above to use in your own projects
 
 This is free software distributed under the GNU General Public License.
 
