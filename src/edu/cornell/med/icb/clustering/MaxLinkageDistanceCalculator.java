@@ -76,9 +76,9 @@ public abstract class MaxLinkageDistanceCalculator
      * ignoreDistance is returned. The clustering algorithm uses ignoreDistance
      * to recognize cases when the distance is unknown.
      *
-     * @return The minimum integer value, so that max(min, a)=a;
+     * @return The minimum value, so that max(min, a) = a;
      */
     public final double getIgnoreDistance() {
-        return Integer.MIN_VALUE;
+        return Double.MIN_VALUE;
     }
 }
