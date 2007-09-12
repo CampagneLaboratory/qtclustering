@@ -65,18 +65,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/commons-collections-3.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../java/commons-collections-3.2-src.zip!/commons-collections-3.2-src/src/java" />
-          <root url="jar://$MODULE_DIR$/../../../../../java/commons-collections-3.2-src.zip!/commons-collections-3.2-src/src/test" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/log4j-1.2.15.jar!/" />
         </CLASSES>
         <JAVADOC />
