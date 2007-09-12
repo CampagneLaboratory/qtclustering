@@ -82,7 +82,9 @@ public final class QTClusterer extends AbstractQTClusterer {
      * i.e., |G| where G is the set of instances
      */
     public QTClusterer(final int numberOfInstances) {
-        this(numberOfInstances, ParallelTeam.getDefaultThreadCount());
+        // create at least 1 thread, but not more than the number of instances
+        this(numberOfInstances, Math.max(Math.min(
+                ParallelTeam.getDefaultThreadCount(), numberOfInstances), 1));
     }
 
     /**
