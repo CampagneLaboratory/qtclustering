@@ -201,15 +201,13 @@ public final class QTClusterer implements Clusterer {
                 parallelTeam.execute(new ParallelRegion() {          // NOPMD
                     @Override
                     public void run() throws Exception {             // NOPMD
-                        // each thread will populate a different portion of
-                        // the "tmpCluster" array so we shouldn't need to
-                        // worry about concurrent access
+                        // each thread will populate a different portion of the "tmpCluster"
+                        // array so we shouldn't need to worry about concurrent access
                         execute(0, instanceList.size() - 1, new IntegerForLoop() {
                             @Override
                             public void run(final int first, final int last) {
                                 if (LOGGER.isDebugEnabled()) {
-                                    LOGGER.debug("first = " + first
-                                            + ", last = " + last);
+                                    LOGGER.debug("first = " + first + ", last = " + last);
                                 }
                                 for (int i = first; i <= last; i++) {
                                     @SuppressWarnings("unchecked")
@@ -237,11 +235,9 @@ public final class QTClusterer implements Clusterer {
                                         int minDistanceInstanceIndex = 0;
                                         int instanceIndex = 0;
                                         final IntArrayList cluster = tmpClusters[i];
-                                        final int[] clusterArray = cluster.elements();
-                                        final int clusterSize = cluster.size();
                                         for (final int instance : notClustered) {
-                                            final double newDistance = calculator.distance(
-                                                    clusterArray, clusterSize, instance);
+                                            final double newDistance =
+                                                    calculator.distance(cluster, instance);
 
                                             if (newDistance <= minDistance) {
                                                 minDistance = newDistance;
@@ -250,14 +246,17 @@ public final class QTClusterer implements Clusterer {
                                             instanceIndex++;
                                         }
 
-                                        // grow clusters until min distance
-                                        // between new instance and cluster
-                                        // reaches quality threshold
+                                        // grow clusters until min distance between new instance
+                                        // and cluster reaches quality threshold
                                         // if (diameter(Ai U {j}) > d)
                                         if (minDistance > qualityThreshold) {
                                             done = true;
                                         } else {
-                                            cluster.add(notClustered.remove(minDistanceInstanceIndex));
+                                            // remove the instance from the ones to be considered
+                                            final int instance =
+                                                    notClustered.remove(minDistanceInstanceIndex);
+                                            // and add it to the newly formed cluster
+                                            cluster.add(instance);
                                         }
                                         if (logInnerLoopProgress) {
                                             innerLoopProgressLogger.update();
@@ -332,7 +331,6 @@ public final class QTClusterer implements Clusterer {
                 throw new ClusteringException(e);
             }
         }
-
 
         clusterProgressLogger.stop("Clustering completed.");
         return getClusters();
@@ -421,5 +419,4 @@ public final class QTClusterer implements Clusterer {
     public void setLogInterval(final long interval) {
         this.logInterval = interval;
     }
-
 }

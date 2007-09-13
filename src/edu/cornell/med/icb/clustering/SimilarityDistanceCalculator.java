@@ -18,6 +18,8 @@
 
 package edu.cornell.med.icb.clustering;
 
+import java.util.List;
+
 /**
  * Calculates a similarity measure between two instances available to the
  * clustering algorithm, or between one instance and a cluster.
@@ -39,14 +41,12 @@ public interface SimilarityDistanceCalculator {
     /**
      * Returns the distance between an instance and the instances in a cluster.
      *
-     * @param cluster Cluster array
-     * @param clusterSize Number of the cluster array that contain instances.
-     * Other elements must not be accessed.
+     * @param cluster Cluster
      * @param instanceIndex Index of the instance that is compared to the
      * cluster.
      * @return the distance between an instance and the instances in a cluster.
      */
-    double distance(int[] cluster, int clusterSize, int instanceIndex);
+    double distance(List<Integer> cluster, int instanceIndex);
 
     /**
      * When some distances between instance pairs are missing/unknown the

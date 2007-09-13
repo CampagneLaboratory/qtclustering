@@ -18,6 +18,8 @@
 
 package edu.cornell.med.icb.clustering;
 
+import java.util.List;
+
 /**
  * Maximum distance linkage calculator. Calculate the distance of a point to
  * a cluster as the maximum distance between the point and each point of the
@@ -40,19 +42,17 @@ public abstract class MaxLinkageDistanceCalculator
      * Returns the distance between an instance and the instances in a cluster.
      * The default implementation calculates maximum linkage (max of the
      * distances between instances in the cluster and instanceIndex).
-     * @param cluster Cluster array
-     * @param clusterSize Number of the cluster array that contain instances.
-     * Other elements must not be accessed.
+     * @param cluster A list of indicies that represent instances in a cluster
      * @param instanceIndex Index of the instance that is compared to the
      * cluster.
      * @return the distance between an instance and the instances in a cluster.
      */
-    public final double distance(final int[] cluster, final int clusterSize,
+    public final double distance(final List<Integer> cluster,
                                  final int instanceIndex) {
         double maxDistance = Double.MIN_VALUE;
 
-        for (int i = 0; i < clusterSize; ++i) {
-            final double a = distance(cluster[i], instanceIndex);
+        for (final int indexOfInstanceInCluster : cluster) {
+            final double a = distance(indexOfInstanceInCluster, instanceIndex);
             final double b = maxDistance;
 
             // This code is inlined from java.lang.Math.max(a, b)
