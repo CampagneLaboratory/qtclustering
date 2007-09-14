@@ -39,7 +39,7 @@ public interface Clusterer {
      * @return The list of clusters.
      */
     List<int[]> cluster(final SimilarityDistanceCalculator calculator,
-                        final float qualityThreshold);
+                        final double qualityThreshold);
 
     /**
      * Returns the list of clusters produced by clustering.

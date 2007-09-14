@@ -153,7 +153,7 @@ public final class QTClusterer implements Clusterer {
      */
     public List<int[]> cluster(
             final SimilarityDistanceCalculator calculator,
-            final float qualityThreshold) {
+            final double qualityThreshold) {
         final ProgressLogger clusterProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "instances clustered");
         clusterProgressLogger.displayFreeMemory = true;
@@ -249,7 +249,7 @@ public final class QTClusterer implements Clusterer {
                                         // grow clusters until min distance between new instance
                                         // and cluster reaches quality threshold
                                         // if (diameter(Ai U {j}) > d)
-                                        if (minDistance > qualityThreshold) {
+                                        if (calculator.isDiameterLargerThanThreshold(minDistance, qualityThreshold)) {
                                             done = true;
                                         } else {
                                             // remove the instance from the ones to be considered
@@ -335,6 +335,8 @@ public final class QTClusterer implements Clusterer {
         clusterProgressLogger.stop("Clustering completed.");
         return getClusters();
     }
+
+
 
     /**
      * Returns the list of clusters produced by clustering.
