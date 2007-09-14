@@ -32,12 +32,68 @@ import java.util.List;
 
 /**
  * Implements the QT Clustering algorithm. (QT stands for Quality
- * Threshold/diameter of the cluster)
- * See  http://en.wikipedia.org/wiki/Data_clustering#Types_of_clustering
- * and http://www.genome.org/cgi/content/full/9/11/1106 Heyer LJ et al 1999.
- * (just implement the interface
- * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}).
+ * Threshold/diameter of the cluster).
+ * See <a href="http://en.wikipedia.org/wiki/Data_clustering#Types_of_clustering">Wikipedia</a>
+ * and <a href="http://www.genome.org/cgi/content/full/9/11/1106">Heyer LJ et al 1999</a>.
+ * <p/>
+ * Note that this implementation does not reference the actual instances of the
+ * data being clustered directly.  It assumes the data is held in an external array or
+ * indexed collection.  It relies on the specific implementation of
+ * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}
+ * to map the indices back to the original data source.
+ * <p/>
+ * For example, if you wanted to group the text of Abraham Lincoln's Gettysburg Address
+ * into clusters of words of the same size, the following code snippet would achieve this.
  *
+ * <pre>
+ *    final String text = "Four score and seven years ago our fathers brought forth on this"
+ *               + " continent a new nation conceived in liberty and dedicated to the proposition"
+ *               + " that all men are created equal";
+ *    // break the text up into an array of indiviual words
+ *    final String[] words = text.split(" ");
+ *
+ *    // create a distance calculator that returns the difference in size between the two words
+ *    final SimilarityDistanceCalculator distanceCalculator =
+ *               new MaxLinkageDistanceCalculator() {
+ *                   public double distance(final int i, final int j) {
+ *                       return Math.abs(words[i].length() - words[j].length());
+ *                   }
+ *               };
+ *
+ *    // and cluster the words into groups according to their size
+ *    final Clusterer clusterer = new QTClusterer(words.length);
+ *    final List&lt;int[]&gt; clusters = clusterer.cluster(distanceCalculator, 0.5);
+ * </pre>
+ *
+ * The cluster arrays that result are:
+ * <pre>
+ *   { 2, 27, 26, 25, 22, 19, 14, 6, 5 },
+ *   { 1, 29, 9, 4, 3 },
+ *   { 7, 28, 18, 8 },
+ *   { 0, 24, 11 },
+ *   { 10, 21, 17 },
+ *   { 12, 20, 16 },
+ *   { 13 },
+ *   { 15 },
+ *   { 23 }
+ * </pre>
+ *
+ * The cluster arrays are indexes into the original data source and will map back into the
+ * text as follows:
+ * <pre>
+ *   { "and", "are", "men", "all", "the", "and", "new", "our", "ago" },
+ *   { "score", "equal", "forth", "years", "seven" },
+ *   { "fathers", "created", "liberty", "brought" },
+ *   { "Four", "that", "this" },
+ *   { "on", "to", "in" },
+ *   { "continent", "dedicated", "conceived" },
+ *   { "a" },
+ *   { "nation" },
+ *   { "proposition" }
+ * </pre>
+ *
+ * Changing the threshold given to the {@link #cluster(SimilarityDistanceCalculator, double)}
+ * method will result in different groupings of words.
  */
 public final class QTClusterer implements Clusterer {
     /**
@@ -70,7 +126,7 @@ public final class QTClusterer implements Clusterer {
     /**
      *  A "temporary" cluster list used to find the maximum cardinality.
      */
-    private final IntArrayList[] tmpClusters;
+    private final IntArrayList[] candidateClusters;
 
     /**
      * Indicates that progress on cluster being assembled.
@@ -134,10 +190,10 @@ public final class QTClusterer implements Clusterer {
         instanceCount = numberOfInstances;
         parallelTeam = team;
         clusters = new IntArrayList[numberOfInstances];
-        tmpClusters = new IntArrayList[numberOfInstances];
+        candidateClusters = new IntArrayList[numberOfInstances];
         for (int i = 0; i < numberOfInstances; i++) {
             clusters[i] = new IntArrayList();                        // NOPMD
-            tmpClusters[i] = new IntArrayList();                     // NOPMD
+            candidateClusters[i] = new IntArrayList();               // NOPMD
         }
     }
 
@@ -159,8 +215,7 @@ public final class QTClusterer implements Clusterer {
         clusterProgressLogger.displayFreeMemory = true;
         clusterProgressLogger.expectedUpdates = instanceCount;
         clusterProgressLogger.start("Starting to cluster " + instanceCount
-                + " instances using " + parallelTeam.getThreadCount()
-                + " threads.");
+                + " instances using " + parallelTeam.getThreadCount() + " threads.");
 
         // reset cluster results
         clusterCount = 0;
@@ -187,7 +242,7 @@ public final class QTClusterer implements Clusterer {
             while (!instanceList.isEmpty()) {
                 // cluster remaining instances to find the maximum cardinality
                 for (int i = 0; i < instanceCount; i++) {
-                    tmpClusters[i].clear();
+                    candidateClusters[i].clear();
                 }
 
                 if (logOuterLoopProgress) {
@@ -201,7 +256,7 @@ public final class QTClusterer implements Clusterer {
                 parallelTeam.execute(new ParallelRegion() {          // NOPMD
                     @Override
                     public void run() throws Exception {             // NOPMD
-                        // each thread will populate a different portion of the "tmpCluster"
+                        // each thread will populate a different portion of the "candidateCluster"
                         // array so we shouldn't need to worry about concurrent access
                         execute(0, instanceList.size() - 1, new IntegerForLoop() {
                             @Override
@@ -214,8 +269,9 @@ public final class QTClusterer implements Clusterer {
                                     final LinkedList<Integer> notClustered =
                                             (LinkedList<Integer>) instanceList.clone();
 
-                                    // add the first instance to the next cluster
-                                    tmpClusters[i].add(notClustered.remove(i));
+                                    // add the first instance to the next candidate cluster
+                                    final IntArrayList candidateCluster = candidateClusters[i];
+                                    candidateCluster.add(notClustered.remove(i));
 
                                     if (logInnerLoopProgress) {
                                         innerLoopProgressLogger.expectedUpdates =
@@ -234,10 +290,9 @@ public final class QTClusterer implements Clusterer {
                                         double minDistance = Double.MAX_VALUE;
                                         int minDistanceInstanceIndex = 0;
                                         int instanceIndex = 0;
-                                        final IntArrayList cluster = tmpClusters[i];
                                         for (final int instance : notClustered) {
                                             final double newDistance =
-                                                    calculator.distance(cluster, instance);
+                                                    calculator.distance(candidateCluster, instance);
 
                                             if (newDistance <= minDistance) {
                                                 minDistance = newDistance;
@@ -256,7 +311,7 @@ public final class QTClusterer implements Clusterer {
                                             final int instance =
                                                     notClustered.remove(minDistanceInstanceIndex);
                                             // and add it to the newly formed cluster
-                                            cluster.add(instance);
+                                            candidateCluster.add(instance);
                                         }
                                         if (logInnerLoopProgress) {
                                             innerLoopProgressLogger.update();
@@ -282,10 +337,10 @@ public final class QTClusterer implements Clusterer {
                 int maxCardinality = 0;
                 int selectedClusterIndex = -1;
                 for (int i = 0; i < instanceCount; i++) {
-                    final int size = tmpClusters[i].size();
+                    final int size = candidateClusters[i].size();
                     if (LOGGER.isTraceEnabled() && size > 0) {
                         LOGGER.trace("potential cluster " + i + ": "
-                                + ArrayUtils.toString(tmpClusters[i]));
+                                + ArrayUtils.toString(candidateClusters[i]));
                     }
                     if (size > maxCardinality) {
                         maxCardinality = size;
@@ -293,8 +348,7 @@ public final class QTClusterer implements Clusterer {
                     }
                 }
 
-                final IntArrayList selectedCluster =
-                        tmpClusters[selectedClusterIndex];
+                final IntArrayList selectedCluster = candidateClusters[selectedClusterIndex];
 
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("adding " + selectedCluster.size()

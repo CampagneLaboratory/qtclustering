@@ -21,11 +21,14 @@ package edu.cornell.med.icb.clustering;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -107,7 +110,7 @@ public final class TestQTClusterer {
         assertEquals(10d, distanceCalculator.distance(0, 2), DELTA);
         assertEquals(10d, distanceCalculator.distance(2, 0), DELTA);
         assertEquals(10d, distanceCalculator.distance(2, 3), DELTA);
-        final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
+        final List<int[]> clusters = clusterer.cluster(distanceCalculator, 11);
         assertNotNull(clusters);
         assertEquals("Expected one cluster", 1, clusters.size());
         final int[] cluster = clusters.get(0);
@@ -313,5 +316,160 @@ public final class TestQTClusterer {
                 j++;
             }
         }
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void clusterWordsInAString() {
+        final String text = "Four score and seven years ago our fathers brought forth on this"
+                + " continent a new nation conceived in liberty and dedicated to the proposition"
+                + " that all men are created equal";
+
+        final List<String[]> expectedResults = new ArrayList<String[]>();
+        expectedResults.add(new String[] {"and","are","men","all","the","and","new","our","ago"});
+        expectedResults.add(new String[] {"score","equal","forth","years","seven"});
+        expectedResults.add(new String[] {"fathers","created","liberty","brought"});
+        expectedResults.add(new String[] {"Four","that","this"});
+        expectedResults.add(new String[] {"on","to","in"});
+        expectedResults.add(new String[] {"continent","dedicated","conceived"});
+        expectedResults.add(new String[] {"a"});
+        expectedResults.add(new String[] {"nation"});
+        expectedResults.add(new String[] {"proposition"});
+
+        // break the text up into an array of indiviual words
+        final String[] words = text.split(" ");
+
+        // create a distance calculator that returns the difference in size between the two words
+        final SimilarityDistanceCalculator distanceCalculator =
+                new MaxLinkageDistanceCalculator() {
+                    @Override
+                    public double distance(final int i, final int j) {
+                        return Math.abs(words[i].length() - words[j].length());
+                    }
+                };
+
+        // and cluster the words into groups according to their size
+        final Clusterer clusterer = new QTClusterer(words.length);
+        final List<int[]> clusters = clusterer.cluster(distanceCalculator, 0.5);
+
+        int j = 0;
+        for (final int[] cluster : clusters) {
+            // convert instance indexes from the cluster to source data
+            final String[] result = new String[cluster.length];
+            for (int k = 0; k < result.length; k++) {
+                result[k] = words[cluster[k]];
+            }
+            LOGGER.debug(ArrayUtils.toString(cluster));
+            LOGGER.debug(ArrayUtils.toString(result));
+            assertTrue("Cluster " + j + " does not match expected",
+                    ArrayUtils.isEquals(expectedResults.get(j), result));
+            j++;
+        }
+    }
+
+
+    private interface Person {
+    }
+    private interface Place {
+    }
+    private interface Thing {
+    }
+
+    /**
+     * Tests clustering with lists of object types.
+     */
+    @Test
+    public void clusterObjectCollections() {
+        final List<Object> peoplePlacesAndThings = new ArrayList<Object>();
+        final Person tom = new Person() { };
+        final Person dick = new Person() { };
+        final Person harry = new Person() { };
+
+        peoplePlacesAndThings.add(tom);
+        peoplePlacesAndThings.add(dick);
+        peoplePlacesAndThings.add(harry);
+
+        final Place home = new Place() { };
+        final Place work = new Place() { };
+        final Place school = new Place() { };
+
+        peoplePlacesAndThings.add(home);
+        peoplePlacesAndThings.add(work);
+        peoplePlacesAndThings.add(school);
+
+        final Thing pencil = new Thing() { };
+        final Thing pen = new Thing() { };
+        final Thing paper = new Thing() { };
+        final Thing stapler = new Thing() { };
+
+        peoplePlacesAndThings.add(pencil);
+        peoplePlacesAndThings.add(pen);
+        peoplePlacesAndThings.add(paper);
+        peoplePlacesAndThings.add(stapler);
+
+        // put things in a random order just to make things interesting
+        Collections.shuffle(peoplePlacesAndThings);
+
+        final Clusterer clusterer = new QTClusterer(peoplePlacesAndThings.size());
+        final List<int[]> clusters = clusterer.cluster(new MaxLinkageDistanceCalculator() {
+            public double distance(final int i, final int j) {
+                final Object object1 = peoplePlacesAndThings.get(i);
+                final Object object2 = peoplePlacesAndThings.get(j);
+                if (object1 instanceof Person && object2 instanceof Person) {
+                    return 0;
+                } else if (object1 instanceof Place && object2 instanceof Place) {
+                    return 0;
+                } else if (object1 instanceof Thing && object2 instanceof Thing) {
+                    return 0;
+                } else {
+                    return 42;
+                }
+            }
+        }, 1.0f);
+
+        assertNotNull("Cluster should not be null", clusters);
+        assertEquals("There should be 3 clusters", 3, clusters.size());
+
+        boolean peopleClustered = false;
+        boolean placesClustered = false;
+        boolean thingsClustered = false;
+
+        for (final int[] cluster : clusters) {
+            // check the type of the first, so we know what we're dealing with
+            final Object object = peoplePlacesAndThings.get(cluster[0]);
+            if (object instanceof Person) {
+                assertEquals("There should be 3 people", 3, cluster.length);
+                assertFalse("There appears to be more than one cluster of people", peopleClustered);
+                peopleClustered = true;
+                for (int i = 1; i < cluster.length; i++) {
+                    final Object person = peoplePlacesAndThings.get(cluster[i]);
+                    assertTrue("Cluster contains more than people", person instanceof Person);
+                }
+            } else if (object instanceof Place) {
+                assertEquals("There should be 3 places", 3, cluster.length);
+                assertFalse("There appears to be more than one cluster of places", placesClustered);
+                placesClustered = true;
+                for (int i = 1; i < cluster.length; i++) {
+                    final Object place = peoplePlacesAndThings.get(cluster[i]);
+                    assertTrue("Cluster contains more than places", place instanceof Place);
+                }
+            } else if (object instanceof Thing) {
+                assertEquals("There should be 4 things", 4, cluster.length);
+                assertFalse("There appears to be more than one cluster of things", thingsClustered);
+                thingsClustered = true;
+                for (int i = 1; i < cluster.length; i++) {
+                    final Object thing = peoplePlacesAndThings.get(cluster[i]);
+                    assertTrue("Cluster contains more than things", thing instanceof Thing);
+                }
+            } else {
+                fail("Cluster contains an unknown object type: " + object.getClass().getName());
+            }
+        }
+
+        assertTrue("People should have been clustered", peopleClustered);
+        assertTrue("Places should have been clustered", placesClustered);
+        assertTrue("Things should have been clustered", thingsClustered);
     }
 }
