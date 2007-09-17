@@ -57,14 +57,5 @@ public interface SimilarityDistanceCalculator {
      */
     double getIgnoreDistance();
 
-    /**
-     * Determines when the diameter of a cluster exceeds the quality threshold. In general this method is implemented by
-     * comparing minDistance to qualityThreshold. When more positive distances represented tighter clusters, the test should read
-     * minDistance&lt;qualityThreshold. However, when more negative distances represent tighter clusters,
-     * the test should read minDistance&gt;qualityThreshold 
-     * @param minDistance
-     * @param qualityThreshold
-     * @return
-     */
-    boolean isDiameterLargerThanThreshold(double minDistance, double qualityThreshold);
+
 }

@@ -32,10 +32,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * User: Fabien Campagne
- * Date: Oct 2, 2005
- * Time: 6:59:35 PM
- * To change this template use File | Settings | File Templates.
+ * User: Fabien Campagne Date: Oct 2, 2005 Time: 6:59:35 PM To change this
+ * template use File | Settings | File Templates.
  */
 public final class TestQTClusterer {
     /**
@@ -59,20 +57,20 @@ public final class TestQTClusterer {
         final Clusterer clusterer = new QTClusterer(2);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-            @Override
-            public double distance(final int instanceIndex,
-                                   final int otherInstanceIndex) {
-                if (instanceIndex != otherInstanceIndex) {
-                    return 100;
-                } else {
-                    return 0;
-                }
-            }
-        };
+                    @Override
+                    public double distance(final int instanceIndex,
+                                           final int otherInstanceIndex) {
+                        if (instanceIndex != otherInstanceIndex) {
+                            return 100;
+                        } else {
+                            return 0;
+                        }
+                    }
+                };
 
         assertEquals(100d, distanceCalculator.distance(0, 1), DELTA);
         assertEquals(100d, distanceCalculator.distance(1, 0), DELTA);
-        assertEquals(0d, distanceCalculator.distance(0, 0) , DELTA);
+        assertEquals(0d, distanceCalculator.distance(0, 0), DELTA);
         assertEquals(0d, distanceCalculator.distance(1, 1), DELTA);
 
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
@@ -145,9 +143,12 @@ public final class TestQTClusterer {
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 10);
         assertNotNull(clusters);
         assertEquals("Incorrect number of clusters", 3, clusters.size());
-        assertEquals("First cluster must have size 2", 2, clusters.get(0).length);
-        assertEquals("Second cluster must have size 1", 1, clusters.get(1).length);
-        assertEquals("Third cluster must have size 1", 1, clusters.get(2).length);
+        assertEquals("First cluster must have size 2", 2,
+                clusters.get(0).length);
+        assertEquals("Second cluster must have size 1", 1,
+                clusters.get(1).length);
+        assertEquals("Third cluster must have size 1", 1,
+                clusters.get(2).length);
         assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
         assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
         assertEquals("Instance 2 in cluster 1", 2, clusters.get(1)[0]);
@@ -174,9 +175,12 @@ public final class TestQTClusterer {
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 2);
         assertNotNull(clusters);
         assertEquals("Incorrect number of clusters", 3, clusters.size());
-        assertEquals("First cluster must have size 2", 2, clusters.get(0).length);
-        assertEquals("Second cluster must have size 1", 1, clusters.get(1).length);
-        assertEquals("Third cluster must have size 1", 1, clusters.get(2).length);
+        assertEquals("First cluster must have size 2", 2,
+                clusters.get(0).length);
+        assertEquals("Second cluster must have size 1", 1,
+                clusters.get(1).length);
+        assertEquals("Third cluster must have size 1", 1,
+                clusters.get(2).length);
         assertEquals("Instance 0 in cluster 0", 0, clusters.get(0)[0]);
         assertEquals("Instance 1 in cluster 0", 1, clusters.get(0)[1]);
         assertEquals("Instance 2 in cluster 2", 2, clusters.get(1)[0]);
@@ -206,8 +210,8 @@ public final class TestQTClusterer {
     }
 
     /**
-     * This test validates that the clusterer will not throw any
-     * errors when passed zero instances.
+     * This test validates that the clusterer will not throw any errors when
+     * passed zero instances.
      */
     @Test
     public void zeroInstances() {
@@ -230,20 +234,20 @@ public final class TestQTClusterer {
      * This test validates that the clusterer will not not allow a negative
      * instance count.
      */
-    @Test (expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void illegalInstanceCount() {
         new QTClusterer(-1);
     }
 
     /**
-     * This test validates that a dataset is clustered correctly using
-     * various different values of thresholds.
+     * This test validates that a dataset is clustered correctly using various
+     * different values of thresholds.
      */
     @Test
     public void multipleThresholds() {
         // raw data to test
         final int[] data = {
-            1, 2, 3, 3, 2, 1, 42, 43, 4, 6
+                1, 2, 3, 3, 2, 1, 42, 43, 4, 6
         };
 
         // list of expected results per threshold tested
@@ -251,36 +255,43 @@ public final class TestQTClusterer {
         final List<int[]>[] expectedResults = new List[6];
         // threshold = 0 ( each instance in it's own cluster )
         expectedResults[0] = new ArrayList<int[]>();
-        for (final int i : data) {
-            expectedResults[0].add(new int[] { i });
-        }
+       
+        // threshold = 0
+        expectedResults[0] = new ArrayList<int[]>();
+        expectedResults[0].add(new int[]{1, 1});
+        expectedResults[0].add(new int[]{2, 2});
+        expectedResults[0].add(new int[]{3, 3});
+        expectedResults[0].add(new int[]{42});             
+        expectedResults[0].add(new int[]{43});                   
+        expectedResults[0].add(new int[]{4});
+        expectedResults[0].add(new int[]{6});
 
         // threshold = 1
         expectedResults[1] = new ArrayList<int[]>();
-        expectedResults[1].add(new int[] { 1, 1, 2, 2 });
-        expectedResults[1].add(new int[] { 3, 3, 4 });
-        expectedResults[1].add(new int[] { 42, 43 });
-        expectedResults[1].add(new int[] { 6 });
+        expectedResults[1].add(new int[]{1, 1, 2, 2});
+        expectedResults[1].add(new int[]{3, 3, 4});
+        expectedResults[1].add(new int[]{42, 43});
+        expectedResults[1].add(new int[]{6});
 
         // threshold = 2
         expectedResults[2] = new ArrayList<int[]>();
-        expectedResults[2].add(new int[] { 1, 1, 2, 2, 3, 3 });
-        expectedResults[2].add(new int[] { 42, 43 });
-        expectedResults[2].add(new int[] { 4, 6 });
+        expectedResults[2].add(new int[]{1, 1, 2, 2, 3, 3});
+        expectedResults[2].add(new int[]{42, 43});
+        expectedResults[2].add(new int[]{4, 6});
 
         // threshold = 3
         expectedResults[3] = new ArrayList<int[]>();
-        expectedResults[3].add(new int[] { 1, 1, 2, 2, 3, 3, 4 });
-        expectedResults[3].add(new int[] { 42, 43 });
-        expectedResults[3].add(new int[] { 6 });
+        expectedResults[3].add(new int[]{1, 1, 2, 2, 3, 3, 4});
+        expectedResults[3].add(new int[]{42, 43});
+        expectedResults[3].add(new int[]{6});
 
         // threshold = 4 (same as 3)
         expectedResults[4] = new ArrayList<int[]>(expectedResults[3]);
 
         // threshold = 5
         expectedResults[5] = new ArrayList<int[]>();
-        expectedResults[5].add(new int[] { 1, 1, 2, 2, 3, 3, 4, 6 });
-        expectedResults[5].add(new int[] { 42, 43 });
+        expectedResults[5].add(new int[]{1, 1, 2, 2, 3, 3, 4, 6});
+        expectedResults[5].add(new int[]{42, 43});
 
 
         final Clusterer clusterer = new QTClusterer(data.length);

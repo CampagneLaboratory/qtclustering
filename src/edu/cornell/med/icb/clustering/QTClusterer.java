@@ -51,7 +51,6 @@ import java.util.List;
  *               + " that all men are created equal";
  *    // break the text up into an array of indiviual words
  *    final String[] words = text.split(" ");
- *
  *    // create a distance calculator that returns the difference in size between the two words
  *    final SimilarityDistanceCalculator distanceCalculator =
  *               new MaxLinkageDistanceCalculator() {
@@ -124,7 +123,7 @@ public final class QTClusterer implements Clusterer {
     private final IntArrayList[] clusters;
 
     /**
-     *  A "temporary" cluster list used to find the maximum cardinality.
+     * A "temporary" cluster list used to find the maximum cardinality.
      */
     private final IntArrayList[] candidateClusters;
 
@@ -152,7 +151,7 @@ public final class QTClusterer implements Clusterer {
      * Construct a new quality threshold clusterer.
      *
      * @param numberOfInstances The number of instances to cluster.
-     * i.e., |G| where G is the set of instances
+     *                          i.e., |G| where G is the set of instances
      */
     public QTClusterer(final int numberOfInstances) {
         // create at least 1 thread, but not more than the number of instances
@@ -164,8 +163,8 @@ public final class QTClusterer implements Clusterer {
      * Construct a new quality threshold clusterer.
      *
      * @param numberOfInstances The number of instances to cluster.
-     * i.e., |G| where G is the set of instances
-     * @param numberOfThreads Number of threads to use when clustering.
+     *                          i.e., |G| where G is the set of instances
+     * @param numberOfThreads   Number of threads to use when clustering.
      */
     public QTClusterer(final int numberOfInstances,
                        final int numberOfThreads) {
@@ -176,8 +175,8 @@ public final class QTClusterer implements Clusterer {
      * Construct a new quality threshold clusterer.
      *
      * @param numberOfInstances The number of instances to cluster.
-     * i.e., |G| where G is the set of instances
-     * @param team The parallel team to use when clustering.
+     *                          i.e., |G| where G is the set of instances
+     * @param team              The parallel team to use when clustering.
      */
     public QTClusterer(final int numberOfInstances,
                        final ParallelTeam team) {
@@ -201,9 +200,9 @@ public final class QTClusterer implements Clusterer {
      * Groups instances into clusters. Returns the indices of the instances
      * that belong to a cluster as an int array in the list result.
      *
-     * @param calculator The
-     * {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}
-     * that should be used when clustering
+     * @param calculator       The
+     *                         {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}
+     *                         that should be used when clustering
      * @param qualityThreshold The QT clustering algorithm quality threshold (d)
      * @return The list of clusters.
      */
@@ -254,6 +253,7 @@ public final class QTClusterer implements Clusterer {
                 // foreach i in G (instance list)
                 // find instance j such that distance i,j minimum
                 parallelTeam.execute(new ParallelRegion() {          // NOPMD
+
                     @Override
                     public void run() throws Exception {             // NOPMD
                         // each thread will populate a different portion of the "candidateCluster"
@@ -277,7 +277,7 @@ public final class QTClusterer implements Clusterer {
                                         innerLoopProgressLogger.expectedUpdates =
                                                 notClustered.size();
                                         innerLoopProgressLogger.start("Entering inner loop for "
-                                                +  notClustered.size() + " iterations");
+                                                + notClustered.size() + " iterations");
                                     }
 
                                     // cluster the remaining instances to find the maximum
@@ -294,17 +294,20 @@ public final class QTClusterer implements Clusterer {
                                             final double newDistance =
                                                     calculator.distance(candidateCluster, instance);
 
-                                            if (newDistance <= minDistance) {
+                                            if (newDistance!=calculator.getIgnoreDistance() && newDistance <= minDistance) {
+
                                                 minDistance = newDistance;
                                                 minDistanceInstanceIndex = instanceIndex;
+                                      //          System.out.println("  minDistance: " + minDistance);
+
                                             }
                                             instanceIndex++;
                                         }
-
+                             //           System.out.println("== minDistance: " + minDistance);
                                         // grow clusters until min distance between new instance
                                         // and cluster reaches quality threshold
                                         // if (diameter(Ai U {j}) > d)
-                                        if (calculator.isDiameterLargerThanThreshold(minDistance, qualityThreshold)) {
+                                        if (minDistance > qualityThreshold) {
                                             done = true;
                                         } else {
                                             // remove the instance from the ones to be considered
@@ -391,7 +394,6 @@ public final class QTClusterer implements Clusterer {
     }
 
 
-
     /**
      * Returns the list of clusters produced by clustering.
      *
@@ -409,6 +411,7 @@ public final class QTClusterer implements Clusterer {
 
     /**
      * Is progress on clusters being logged?
+     *
      * @return true if logging is enabled for clusters being built.
      */
     public boolean isLogClusterProgress() {
@@ -417,8 +420,9 @@ public final class QTClusterer implements Clusterer {
 
     /**
      * Should progress on the clusters be logged?
+     *
      * @param value indicates whether or not logging should be enabled for
-     * clusters being built.
+     *              clusters being built.
      */
     public void setLogClusterProgress(final boolean value) {
         this.logClusterProgress = value;
@@ -426,6 +430,7 @@ public final class QTClusterer implements Clusterer {
 
     /**
      * Is progress on the inner loop being logged?
+     *
      * @return true if logging is enabled for the inner loop
      */
     public boolean isLogInnerLoopProgress() {
@@ -434,8 +439,9 @@ public final class QTClusterer implements Clusterer {
 
     /**
      * Should progress on the inner loop be logged?
+     *
      * @param value indicates whether or not logging should be enabled for
-     * the inner loop
+     *              the inner loop
      */
     public void setLogInnerLoopProgress(final boolean value) {
         this.logInnerLoopProgress = value;
@@ -443,6 +449,7 @@ public final class QTClusterer implements Clusterer {
 
     /**
      * Is progress on the outer loop being logged?
+     *
      * @return true if logging is enabled for the outer loop
      */
     public boolean isLogOuterLoopProgress() {
@@ -451,8 +458,9 @@ public final class QTClusterer implements Clusterer {
 
     /**
      * Should progress on the outer loop be logged?
+     *
      * @param value indicates whether or not logging should be enabled for
-     * the outer loop
+     *              the outer loop
      */
     public void setLogOuterLoopProgress(final boolean value) {
         this.logOuterLoopProgress = value;
