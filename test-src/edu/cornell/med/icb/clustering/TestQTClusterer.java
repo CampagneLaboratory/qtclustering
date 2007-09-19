@@ -255,14 +255,14 @@ public final class TestQTClusterer {
         final List<int[]>[] expectedResults = new List[6];
         // threshold = 0 ( each instance in it's own cluster )
         expectedResults[0] = new ArrayList<int[]>();
-       
+
         // threshold = 0
         expectedResults[0] = new ArrayList<int[]>();
         expectedResults[0].add(new int[]{1, 1});
         expectedResults[0].add(new int[]{2, 2});
         expectedResults[0].add(new int[]{3, 3});
-        expectedResults[0].add(new int[]{42});             
-        expectedResults[0].add(new int[]{43});                   
+        expectedResults[0].add(new int[]{42});
+        expectedResults[0].add(new int[]{43});
         expectedResults[0].add(new int[]{4});
         expectedResults[0].add(new int[]{6});
 
@@ -330,7 +330,7 @@ public final class TestQTClusterer {
     }
 
     /**
-     *
+     * A test that uses a clusters words of equal length together. 
      */
     @Test
     public void clusterWordsInAString() {
@@ -363,7 +363,7 @@ public final class TestQTClusterer {
 
         // and cluster the words into groups according to their size
         final Clusterer clusterer = new QTClusterer(words.length);
-        final List<int[]> clusters = clusterer.cluster(distanceCalculator, 0.5);
+        final List<int[]> clusters = clusterer.cluster(distanceCalculator, 0);
 
         int j = 0;
         for (final int[] cluster : clusters) {

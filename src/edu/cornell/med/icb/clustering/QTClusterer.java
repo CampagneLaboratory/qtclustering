@@ -61,7 +61,7 @@ import java.util.List;
  *
  *    // and cluster the words into groups according to their size
  *    final Clusterer clusterer = new QTClusterer(words.length);
- *    final List&lt;int[]&gt; clusters = clusterer.cluster(distanceCalculator, 0.5);
+ *    final List&lt;int[]&gt; clusters = clusterer.cluster(distanceCalculator, 0);
  * </pre>
  *
  * The cluster arrays that result are:
@@ -294,16 +294,14 @@ public final class QTClusterer implements Clusterer {
                                             final double newDistance =
                                                     calculator.distance(candidateCluster, instance);
 
-                                            if (newDistance!=calculator.getIgnoreDistance() && newDistance <= minDistance) {
+                                            if (newDistance != calculator.getIgnoreDistance()
+                                                    && newDistance <= minDistance) {
 
                                                 minDistance = newDistance;
                                                 minDistanceInstanceIndex = instanceIndex;
-                                      //          System.out.println("  minDistance: " + minDistance);
-
                                             }
                                             instanceIndex++;
                                         }
-                             //           System.out.println("== minDistance: " + minDistance);
                                         // grow clusters until min distance between new instance
                                         // and cluster reaches quality threshold
                                         // if (diameter(Ai U {j}) > d)
