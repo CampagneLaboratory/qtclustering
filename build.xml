@@ -37,15 +37,6 @@
         <path refid="compile.classpath"/>
     </path>
 
-    <path id="cobertura.classpath">
-        <fileset dir="${lib}/cobertura">
-            <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${lib}">
-            <include name="log4j-1.2.15.jar"/>
-        </fileset>
-    </path>
-
     <path id="test.classpath">
         <!--
               Note the classpath order: instrumented classes are before the
@@ -67,9 +58,6 @@
             <pathelement location="${lib}/checkstyle/checkstyle-all-4.3.jar"/>
         </classpath>
     </taskdef>
-
-    <!-- See http://cobertura.sourceforge.net/ -->
-    <taskdef classpathref="cobertura.classpath" resource="tasks.properties"/>
 
     <import file="testsupport/build.xml"/>
 
@@ -218,22 +206,6 @@
 <!-- TODO: there seems to be an issue with cobertura and pj - tests are failing when cobertura is enabled
         <property name="with-cobertura" value="true"/>
 -->
-    </target>
-
-    <target name="cobertura-instrument" if="with-cobertura">
-        <delete file="cobertura.ser"/>
-
-        <cobertura-instrument todir="${cobertura-classes}">
-            <fileset dir="${classes}">
-                <include name="**/*.class"/>
-            </fileset>
-        </cobertura-instrument>
-    </target>
-
-    <target name="cobertura-report" if="with-cobertura">
-        <cobertura-report format="html" destdir="${test-results}/html/cobertura">
-            <fileset dir="${src}"/>
-        </cobertura-report>
     </target>
 
     <!-- See http://www.clarkware.com/software/JDepend.html -->
