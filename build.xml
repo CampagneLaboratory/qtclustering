@@ -52,13 +52,6 @@
         <path refid="cobertura.classpath"/>
     </path>
 
-    <!-- checkstyle source code analyzer task -->
-    <taskdef resource="checkstyletask.properties" onerror="report">
-        <classpath>
-            <pathelement location="${lib}/checkstyle/checkstyle-all-4.3.jar"/>
-        </classpath>
-    </taskdef>
-
     <import file="testsupport/build.xml"/>
 
     <!-- =================================================================== -->
@@ -187,18 +180,6 @@
             </or>
         </condition>
         <fail message="One or more of the tests failed" if="tests-failed"/>
-    </target>
-
-    <target name="checkstyle" depends="init" description="Checks source against coding standards">
-        <checkstyle config="${config}/checkstyle/qtclustering_checks.xml" failonviolation="true">
-            <fileset dir="${src}"/>
-            <classpath refid="test.classpath"/>
-            <formatter type="xml" toFile="${test-results}/checkstyle_errors.xml"/>
-            <formatter type="plain" useFile="false"/>
-        </checkstyle>
-
-        <xslt in="${test-results}/checkstyle_errors.xml" out="${test-results}/html/checkstyle/index.html"
-              style="${config}/checkstyle/checkstyle.xsl"/>
     </target>
 
     <target name="cobertura-setup">
