@@ -120,23 +120,6 @@
 -->
     </target>
 
-    <!-- See http://www.clarkware.com/software/JDepend.html -->
-    <target name="jdepend">
-        <jdepend format="xml" outputfile="${test-results}/jdepend-report.xml"
-            classpathref="compile.classpath">
-            <sourcespath>
-                <pathelement location="src"/>
-            </sourcespath>
-            <classespath>
-                <pathelement location="${classes}"/>
-            </classespath>
-        </jdepend>
-
-        <xslt basedir="${test-results}" destdir="${test-results}/html/jdepend"
-              includes="jdepend-report.xml"
-              style="${ant.home}/etc/jdepend.xsl" />
-    </target>
-
     <target name="autojar" description="Create a jar file for clustering tools using autojar" depends="compile">
         <manifest file="MANIFEST.MF">
             <attribute name="Specification-Title" value="QtClustering Tools"/>
