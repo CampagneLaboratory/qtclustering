@@ -117,6 +117,13 @@
                   test, jar, autojar, javadocs, pmd, cpd, checkstyle, cobertura-report"
             description="Run CruiseControl Build and Tests"/>
 
+    <target name="cobertura-setup">
+        <mkdir dir="${cobertura-classes}"/>
+<!-- TODO: there seems to be an issue with cobertura and pj - tests are failing when cobertura is enabled
+        <property name="with-cobertura" value="true"/>
+-->
+    </target>
+
     <target name="autojar" description="Create a jar file for clustering tools using autojar" depends="compile">
         <manifest file="MANIFEST.MF">
             <attribute name="Specification-Title" value="QtClustering Tools"/>
