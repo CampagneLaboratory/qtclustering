@@ -18,7 +18,7 @@ described as follows:
   - qtclustering.jar      includes all the external classes needed to run
                           (i.e., fastutil, log4j, etc.)
   - qtclustering-core.jar includes only the project classes and will require a
-                          the libraies listed above to use in your own projects
+                          the libraries listed above to use in your own projects
 
 This is free software distributed under the GNU General Public License.
 

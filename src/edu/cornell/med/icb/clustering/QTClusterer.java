@@ -49,7 +49,7 @@ import java.util.List;
  *    final String text = "Four score and seven years ago our fathers brought forth on this"
  *               + " continent a new nation conceived in liberty and dedicated to the proposition"
  *               + " that all men are created equal";
- *    // break the text up into an array of indiviual words
+ *    // break the text up into an array of individual words
  *    final String[] words = text.split(" ");
  *    // create a distance calculator that returns the difference in size between the two words
  *    final SimilarityDistanceCalculator distanceCalculator =
@@ -250,7 +250,7 @@ public final class QTClusterer implements Clusterer {
                             + instanceList.size() + " iterations");
                 }
 
-                // foreach i in G (instance list)
+                // for each i in G (instance list)
                 // find instance j such that distance i,j minimum
                 parallelTeam.execute(new ParallelRegion() {          // NOPMD
 
@@ -379,12 +379,12 @@ public final class QTClusterer implements Clusterer {
 
                 // next iteration is over (G - C)
             }
+        } catch (RuntimeException e) {
+            LOGGER.error("Caught runtime exception - rethrowing", e);
+            throw e;
         } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else {
-                throw new ClusteringException(e);
-            }
+            LOGGER.error("Caught exception - rethrowing as ClusteringException", e);
+            throw new ClusteringException(e);
         }
 
         clusterProgressLogger.stop("Clustering completed.");
@@ -395,9 +395,8 @@ public final class QTClusterer implements Clusterer {
     /**
      * Returns the list of clusters produced by clustering.
      *
-     * @return A list of integer arrays, where each array represents a cluster
-     *         and contains the index of the instance that belongs to a given
-     *         cluster.
+     * @return A list of integer arrays, where each array represents a cluster and contains the
+     *         index of the instance that belongs to a given cluster.
      */
     public List<int[]> getClusters() {
         final List<int[]> result = new ArrayList<int[]>(clusterCount);
@@ -419,8 +418,7 @@ public final class QTClusterer implements Clusterer {
     /**
      * Should progress on the clusters be logged?
      *
-     * @param value indicates whether or not logging should be enabled for
-     *              clusters being built.
+     * @param value indicates whether or not logging should be enabled for clusters being built.
      */
     public void setLogClusterProgress(final boolean value) {
         this.logClusterProgress = value;
@@ -438,8 +436,7 @@ public final class QTClusterer implements Clusterer {
     /**
      * Should progress on the inner loop be logged?
      *
-     * @param value indicates whether or not logging should be enabled for
-     *              the inner loop
+     * @param value indicates whether or not logging should be enabled for the inner loop
      */
     public void setLogInnerLoopProgress(final boolean value) {
         this.logInnerLoopProgress = value;
@@ -457,8 +454,7 @@ public final class QTClusterer implements Clusterer {
     /**
      * Should progress on the outer loop be logged?
      *
-     * @param value indicates whether or not logging should be enabled for
-     *              the outer loop
+     * @param value indicates whether or not logging should be enabled for the outer loop
      */
     public void setLogOuterLoopProgress(final boolean value) {
         this.logOuterLoopProgress = value;

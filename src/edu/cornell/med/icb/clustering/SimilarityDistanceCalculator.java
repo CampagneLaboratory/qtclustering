@@ -56,6 +56,4 @@ public interface SimilarityDistanceCalculator {
      * @return The distance value that the linkage method will ignore.
      */
     double getIgnoreDistance();
-
-
 }

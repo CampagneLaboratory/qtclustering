@@ -158,7 +158,7 @@ public final class TestQTClusterer {
     @Test
     public void fourInstanceClusteringInFourClusters() {
         // put one instance in each cluster, total two instances
-        final QTClusterer clusterer = new QTClusterer(4);
+        final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
                     @Override
@@ -330,7 +330,7 @@ public final class TestQTClusterer {
     }
 
     /**
-     * A test that uses a clusters words of equal length together. 
+     * A test that uses a clusters words of equal length together.
      */
     @Test
     public void clusterWordsInAString() {
@@ -349,7 +349,7 @@ public final class TestQTClusterer {
         expectedResults.add(new String[] {"nation"});
         expectedResults.add(new String[] {"proposition"});
 
-        // break the text up into an array of indiviual words
+        // break the text up into an array of individual words
         final String[] words = text.split(" ");
 
         // create a distance calculator that returns the difference in size between the two words

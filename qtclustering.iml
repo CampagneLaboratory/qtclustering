@@ -64,21 +64,21 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/pj20070907.jar!/" />
+          <root url="jar://$MODULE_DIR$/testsupport/junit/lib/junit-4.4.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../java/pjsrc20070822.jar!/pj/lib" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/testsupport/junit/lib/junit-4.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/pj20071003.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../../java/pjsrc20071003.jar!/pj/lib" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntryProperties />

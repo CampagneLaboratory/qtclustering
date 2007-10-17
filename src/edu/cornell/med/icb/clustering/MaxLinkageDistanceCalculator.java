@@ -35,14 +35,14 @@ public abstract class MaxLinkageDistanceCalculator
      * Representation of the specified floating-point value according to the
      * IEEE 754 floating-point "double format" bit layout.
       */
-     private static long negativeZeroDoubleBits =
+     private static final long negativeZeroDoubleBits =
              Double.doubleToLongBits(-0.0d);
 
     /**
      * Returns the distance between an instance and the instances in a cluster.
      * The default implementation calculates maximum linkage (max of the
      * distances between instances in the cluster and instanceIndex).
-     * @param cluster A list of indicies that represent instances in a cluster
+     * @param cluster A list of indices that represent instances in a cluster
      * @param instanceIndex Index of the instance that is compared to the
      * cluster.
      * @return the distance between an instance and the instances in a cluster.

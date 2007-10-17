@@ -80,6 +80,10 @@
                  header="QtClustering API ${label} (${buildstamp})">
             <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
             <link href="http://fastutil.dsi.unimi.it/docs/"/>
+            <link href="http://mg4j.dsi.unimi.it/docs/"/>
+            <link href="http://commons.apache.org/lang/api-release/"/>
+            <link href="http://logging.apache.org/log4j/1.2/apidocs/"/>
+            <link href="http://www.cs.rit.edu/~ark/pj/doc/"/>
             <classpath>
                 <path refid="compile.classpath"/>
                 <pathelement location="${classes}"/>
@@ -112,13 +116,6 @@
     <target name="cruisecontrol" depends="clean, cobertura-setup, findbugs,
                   test, jar, autojar, javadocs, pmd, cpd, checkstyle, cobertura-report"
             description="Run CruiseControl Build and Tests"/>
-
-    <target name="cobertura-setup">
-        <mkdir dir="${cobertura-classes}"/>
-<!-- TODO: there seems to be an issue with cobertura and pj - tests are failing when cobertura is enabled
-        <property name="with-cobertura" value="true"/>
--->
-    </target>
 
     <target name="autojar" description="Create a jar file for clustering tools using autojar" depends="compile">
         <manifest file="MANIFEST.MF">
