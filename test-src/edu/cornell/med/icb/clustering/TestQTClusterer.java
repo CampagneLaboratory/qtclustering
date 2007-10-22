@@ -20,6 +20,7 @@ package edu.cornell.med.icb.clustering;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -321,9 +322,8 @@ public final class TestQTClusterer {
                 }
                 LOGGER.debug(j + ":" + ArrayUtils.toString(result));
                 final int[] expectedResult = expectedCluster.get(j);
-                assertTrue("Cluster " + j + " with threshold " + i
-                        + " does not match expected",
-                        ArrayUtils.isEquals(expectedResult, result));
+                assertArrayEquals("Cluster " + j + " with threshold " + i
+                        + " does not match expected", expectedResult, result);
                 j++;
             }
         }
@@ -374,8 +374,8 @@ public final class TestQTClusterer {
             }
             LOGGER.debug(ArrayUtils.toString(cluster));
             LOGGER.debug(ArrayUtils.toString(result));
-            assertTrue("Cluster " + j + " does not match expected",
-                    ArrayUtils.isEquals(expectedResults.get(j), result));
+            assertArrayEquals("Cluster " + j + " does not match expected",
+                    expectedResults.get(j), result);
             j++;
         }
     }
