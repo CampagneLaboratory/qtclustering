@@ -25,7 +25,7 @@
           <root url="http://fastutil.dsi.unimi.it/docs/" />
         </JAVADOC>
         <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../../../java/fastutil-5.0.9/java" />
+          <root url="file://$MODULE_DIR$/../../../../../../java/fastutil-5.0.9/java" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -47,8 +47,8 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../java/commons-lang-2.3-src.zip!/commons-lang-2.3-src/src/java" />
-          <root url="jar://$MODULE_DIR$/../../../../../java/commons-lang-2.3-src.zip!/commons-lang-2.3-src/src/test" />
+          <root url="jar://$MODULE_DIR$/../../../../../../java/commons-lang-2.3-src.zip!/commons-lang-2.3-src/src/java" />
+          <root url="jar://$MODULE_DIR$/../../../../../../java/commons-lang-2.3-src.zip!/commons-lang-2.3-src/src/test" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -64,21 +64,23 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/pj20071003.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../java/pjsrc20071003.jar!/pj/lib" />
+          <root url="jar://$MODULE_DIR$/../../../../../../java/junit-4.4-src.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/pj20071021.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../../../java/pjsrc20071021.jar!/pj/lib" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntryProperties />

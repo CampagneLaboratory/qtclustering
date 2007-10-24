@@ -18,17 +18,22 @@
 
 package edu.cornell.med.icb.clustering;
 
+import it.unimi.dsi.mg4j.util.ProgressLogger;
+import org.apache.log4j.Logger;
+
 /**
- * Maximum distance linkage calculator. Calculate the distance of a point to
- * a cluster as the maximum distance between the point and each point of the
- * cluster.
- *
- * @author Fabien Campagne
- * Date: Oct 4, 2005
- * Time: 5:35:52 PM
+ * Maximum distance linkage calculator that uses a local "cache" of distances between each
+ * pair of instances being considered for clustering. Calculate the distance of a point to
+ * a cluster as the maximum distance between the point and each point of the cluster.
  */
-public abstract class MaxLinkageDistanceCalculator
-        implements SimilarityDistanceCalculator {
+public abstract class CachingMaxLinkageDistanceCalculator
+        extends MaxLinkageDistanceCalculator {
+    /**
+     * Used to log debug and informational messages.
+     */
+    private static final Logger LOGGER =
+            Logger.getLogger(CachingMaxLinkageDistanceCalculator.class);
+
     /**
      * Representation of the specified floating-point value according to the
      * IEEE 754 floating-point "double format" bit layout.
@@ -37,14 +42,14 @@ public abstract class MaxLinkageDistanceCalculator
             Double.doubleToLongBits(-0.0d);
 
     /**
-     * Default value to use when pairs are missing or unknown.
+     * A matrix of the distances between every pair of instances.
      */
-    protected final double ignoreDistance = Double.NEGATIVE_INFINITY;
+    private double[][] distanceCache;
 
     /**
-     * Create a new {@link edu.cornell.med.icb.clustering.SimilarityDistanceCalculator}.
+     * Create a new {@link SimilarityDistanceCalculator}.
      */
-    public MaxLinkageDistanceCalculator() {
+    public CachingMaxLinkageDistanceCalculator() {
         super();
     }
 
@@ -55,8 +60,30 @@ public abstract class MaxLinkageDistanceCalculator
      * @param numberOfInstances The largest number of instances that may be considered
      * for clustering.
      */
+    @Override
     public void initialize(final int numberOfInstances) {
-        // this implementation does not require any specific initialization 
+        super.initialize(numberOfInstances);
+        distanceCache = new double[numberOfInstances][numberOfInstances];
+
+        final ProgressLogger initializationProgressLogger =
+                new ProgressLogger(LOGGER, ProgressLogger.DEFAULT_LOG_INTERVAL,
+                        "instances initialized");
+        initializationProgressLogger.displayFreeMemory = true;
+        initializationProgressLogger.expectedUpdates = numberOfInstances;
+        initializationProgressLogger.start("Initializing "
+                + numberOfInstances + " instances.");
+
+
+        // We don't assume the value distance(i,j) is the same as distance(j,i)
+        // although we really could if we need to save a little bit of memory
+        for (int i = 0; i < numberOfInstances; i++) {
+            for (int j = 0; j < numberOfInstances; j++) {
+                distanceCache[i][j] = distance(i, j);
+            }
+            initializationProgressLogger.update();
+        }
+
+        initializationProgressLogger.done();
     }
 
     /**
@@ -68,12 +95,13 @@ public abstract class MaxLinkageDistanceCalculator
      * @param instanceIndex Index of the instance that is compared to the cluster.
      * @return the distance between an instance and the instances in a cluster.
      */
-    public double distance(final int[] cluster, final int clusterSize,
-                           final int instanceIndex) {
+    @Override
+    public final double distance(final int[] cluster, final int clusterSize,
+                                 final int instanceIndex) {
         double maxDistance = ignoreDistance;
 
         for (int i = 0; i < clusterSize; i++) {
-            final double a = distance(cluster[i], instanceIndex);
+            final double a = distanceCache[cluster[i]][instanceIndex];
             final double b = maxDistance;
 
             // This code is inlined from java.lang.Math.max(a, b)
@@ -90,16 +118,5 @@ public abstract class MaxLinkageDistanceCalculator
         }
 
         return maxDistance;
-    }
-
-    /**
-     * When some distances between instance pairs are missing/unknown the
-     * ignoreDistance is returned. The clustering algorithm uses ignoreDistance
-     * to recognize cases when the distance is unknown.
-     *
-     * @return The minimum value, so that max(min, a) = a;
-     */
-    public final double getIgnoreDistance() {
-        return ignoreDistance;
     }
 }

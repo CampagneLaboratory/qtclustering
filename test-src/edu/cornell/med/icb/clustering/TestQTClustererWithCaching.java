@@ -36,7 +36,7 @@ import java.util.List;
  * User: Fabien Campagne Date: Oct 2, 2005 Time: 6:59:35 PM To change this
  * template use File | Settings | File Templates.
  */
-public final class TestQTClusterer {
+public final class TestQTClustererWithCaching {
     /**
      * Used to log debug and informational messages.
      */
@@ -57,7 +57,7 @@ public final class TestQTClusterer {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new QTClusterer(2);
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int instanceIndex,
                                            final int otherInstanceIndex) {
@@ -89,7 +89,7 @@ public final class TestQTClusterer {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int i, final int j) {
                         // instances 0 and 1 belong to same cluster
@@ -125,7 +125,7 @@ public final class TestQTClusterer {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int i, final int j) {
                         // instances 0 and 1 belong to same cluster
@@ -161,7 +161,7 @@ public final class TestQTClusterer {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int i, final int j) {
                         // instances 0 and 1 belong to same cluster
@@ -192,7 +192,7 @@ public final class TestQTClusterer {
     public void zeroDistanceCalculator() {
         final Clusterer clusterer = new QTClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int i, final int j) {
                         return 0;   // instances 0-3 belong to the same cluster
@@ -218,7 +218,7 @@ public final class TestQTClusterer {
     public void zeroInstances() {
         final Clusterer clusterer = new QTClusterer(0);
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int instanceIndex,
                                            final int otherInstanceIndex) {
@@ -229,15 +229,6 @@ public final class TestQTClusterer {
         final List<int[]> result = clusterer.cluster(distanceCalculator, 0);
         assertNotNull(result);
         assertEquals(0, result.size());
-    }
-
-    /**
-     * This test validates that the clusterer will not not allow a negative
-     * instance count.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void illegalInstanceCount() {
-        new QTClusterer(-1);
     }
 
     /**
@@ -298,7 +289,7 @@ public final class TestQTClusterer {
         final Clusterer clusterer = new QTClusterer(data.length);
         // Distance function that returns the difference between instances
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int i, final int j) {
                         return Math.abs(data[i] - data[j]);
@@ -354,7 +345,7 @@ public final class TestQTClusterer {
 
         // create a distance calculator that returns the difference in size between the two words
         final SimilarityDistanceCalculator distanceCalculator =
-                new MaxLinkageDistanceCalculator() {
+                new CachingMaxLinkageDistanceCalculator() {
                     @Override
                     public double distance(final int i, final int j) {
                         return Math.abs(words[i].length() - words[j].length());
@@ -424,7 +415,7 @@ public final class TestQTClusterer {
         Collections.shuffle(peoplePlacesAndThings);
 
         final Clusterer clusterer = new QTClusterer(peoplePlacesAndThings.size());
-        final List<int[]> clusters = clusterer.cluster(new MaxLinkageDistanceCalculator() {
+        final List<int[]> clusters = clusterer.cluster(new CachingMaxLinkageDistanceCalculator() {
             public double distance(final int i, final int j) {
                 final Object object1 = peoplePlacesAndThings.get(i);
                 final Object object2 = peoplePlacesAndThings.get(j);

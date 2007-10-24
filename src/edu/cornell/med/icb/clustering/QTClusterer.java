@@ -228,13 +228,16 @@ public final class QTClusterer implements Clusterer {
             instanceList.add(i);
         }
 
+        // tell the distance calculator how many instances we're dealing with
+        calculator.initialize(instanceCount);
+
         final ProgressLogger innerLoopProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "inner loop iterations");
         innerLoopProgressLogger.displayFreeMemory = false;
 
         final ProgressLogger outerLoopProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "outer loop iterations");
-        outerLoopProgressLogger.displayFreeMemory = false;
+        outerLoopProgressLogger.displayFreeMemory = true;
 
         try {
             // loop over instances until they have all been added to a cluster
@@ -292,7 +295,8 @@ public final class QTClusterer implements Clusterer {
                                         int instanceIndex = 0;
                                         for (final int instance : notClustered) {
                                             final double newDistance =
-                                                    calculator.distance(candidateCluster, instance);
+                                                    calculator.distance(candidateCluster.elements(),
+                                                            candidateCluster.size(), instance);
 
                                             if (newDistance != calculator.getIgnoreDistance()
                                                     && newDistance <= minDistance) {
@@ -390,7 +394,6 @@ public final class QTClusterer implements Clusterer {
         clusterProgressLogger.stop("Clustering completed.");
         return getClusters();
     }
-
 
     /**
      * Returns the list of clusters produced by clustering.

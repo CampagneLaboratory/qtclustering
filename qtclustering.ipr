@@ -65,7 +65,7 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="config-file" value="$PROJECT_DIR$\testsupport\checkstyle\config\icb_checks.xml" />
+        <entry key="config-file" value="$PROJECT_DIR$/../qtclustering\testsupport\checkstyle\config\icb_checks.xml" />
       </map>
     </option>
   </component>
@@ -342,6 +342,20 @@
   <component name="ModuleStructureConfigurable.UI">
     <option name="proportions">
       <SplitterProportionsDataImpl />
+    </option>
+  </component>
+  <component name="PDMPlugin">
+    <option name="options">
+      <map>
+        <entry key="Encoding" value="" />
+        <entry key="Target JDK" value="1.5" />
+      </map>
+    </option>
+    <option name="options">
+      <map>
+        <entry key="Encoding" value="" />
+        <entry key="Target JDK" value="1.5" />
+      </map>
     </option>
   </component>
   <component name="PMDProjectComponent">
