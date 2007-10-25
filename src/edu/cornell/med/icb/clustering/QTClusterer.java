@@ -231,6 +231,45 @@ public final class QTClusterer implements Clusterer {
         // tell the distance calculator how many instances we're dealing with
         calculator.initialize(instanceCount);
 
+        LOGGER.info("Searching for instances that will form singleton clusters");
+        // eliminate any instances that will never cluster with anything else
+        final IntArrayList singletonClusters = new IntArrayList();
+        for (int i = 0; i < instanceCount; i++) {
+            boolean singleton = true;
+            for (final int j : instanceList) {
+                if (i != j) {
+                    final double distance = calculator.distance(i, j);
+                    if (distance <= qualityThreshold) {
+                        // the instance i is likely to be clustered with some j
+                        singleton = false;
+                        break;
+                    }
+                }
+            }
+
+            // instance i is too far from anything else to ever cluster so it's a singleton cluster
+            if (singleton) {
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("adding singleton instance " + i + " to cluster " + clusterCount);
+                }
+
+                // i is a singleton cluster
+                singletonClusters.add(i);
+
+                // and we can remove it from further consideration later
+                // note: we have to remove the "element i" and not the "element at i"
+                instanceList.remove(Integer.valueOf(i));
+
+                if (logClusterProgress) {
+                    clusterProgressLogger.update();
+                }
+            }
+        }
+
+        LOGGER.info(singletonClusters.size() + " singleton instances found");
+        // save the singletons for last since we ideally want to return clusters in size order
+        singletonClusters.trim();
+
         final ProgressLogger innerLoopProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "inner loop iterations");
         innerLoopProgressLogger.displayFreeMemory = false;
@@ -389,6 +428,12 @@ public final class QTClusterer implements Clusterer {
         } catch (Exception e) {
             LOGGER.error("Caught exception - rethrowing as ClusteringException", e);
             throw new ClusteringException(e);
+        }
+
+        // add singleton clusters to the end so the largest clusters are at the start of the list
+        for (final int singleton : singletonClusters) {
+            clusters[clusterCount].add(singleton);
+            clusterCount++;
         }
 
         clusterProgressLogger.stop("Clustering completed.");

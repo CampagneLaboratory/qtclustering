@@ -56,7 +56,7 @@ public abstract class MaxLinkageDistanceCalculator
      * for clustering.
      */
     public void initialize(final int numberOfInstances) {
-        // this implementation does not require any specific initialization 
+        // this implementation does not require any specific initialization
     }
 
     /**

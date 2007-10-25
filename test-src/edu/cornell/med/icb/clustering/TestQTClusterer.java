@@ -33,8 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * User: Fabien Campagne Date: Oct 2, 2005 Time: 6:59:35 PM To change this
- * template use File | Settings | File Templates.
+ * Basic tests of the {@link edu.cornell.med.icb.clustering.QTClusterer
  */
 public final class TestQTClusterer {
     /**

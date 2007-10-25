@@ -344,20 +344,6 @@
       <SplitterProportionsDataImpl />
     </option>
   </component>
-  <component name="PDMPlugin">
-    <option name="options">
-      <map>
-        <entry key="Encoding" value="" />
-        <entry key="Target JDK" value="1.5" />
-      </map>
-    </option>
-    <option name="options">
-      <map>
-        <entry key="Encoding" value="" />
-        <entry key="Target JDK" value="1.5" />
-      </map>
-    </option>
-  </component>
   <component name="PMDProjectComponent">
     <pmd-configuration>
       <options>
