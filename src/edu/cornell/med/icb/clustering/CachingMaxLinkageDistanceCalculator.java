@@ -93,15 +93,28 @@ public abstract class CachingMaxLinkageDistanceCalculator
      * @param cluster A list of indices that represent instances in a cluster
      * @param clusterSize The number of elements in the cluster
      * @param instanceIndex Index of the instance that is compared to the cluster.
+     * @param cutoffDistance If the distance between any instance and the instances in the
+     * cluster are greater than the cutoff distance, then the value returned by
+     * {@link #getIgnoreDistance()} can be safely returned by this method.  Effectively,
+     * this value can be used by an implementation to short circuit computing the actual distance
+
      * @return the distance between an instance and the instances in a cluster.
      */
     @Override
     public final double distance(final int[] cluster, final int clusterSize,
-                                 final int instanceIndex) {
+                                 final int instanceIndex, final double cutoffDistance) {
         double maxDistance = ignoreDistance;
 
         for (int i = 0; i < clusterSize; i++) {
             final double a = distanceCache[cluster[i]][instanceIndex];
+            // if the distance of the instance will force the candidate cluster
+            // to be larger than the cutoff value, we can stop here
+            // because we know that this candidate cluster will be too large
+            if (a >= cutoffDistance) {
+                maxDistance = ignoreDistance;
+                break;
+            }
+
             final double b = maxDistance;
 
             // This code is inlined from java.lang.Math.max(a, b)

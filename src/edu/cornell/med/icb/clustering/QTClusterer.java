@@ -124,6 +124,11 @@ public final class QTClusterer implements Clusterer {
     private final IntArrayList[] clusters;
 
     /**
+     * A "temporary" cluster list used to find the maximum cardinality.
+     */
+    private final IntArrayList[] candidateClusters;
+
+    /**
      * Indicates that progress on cluster being assembled.
      */
     private boolean logClusterProgress = true;
@@ -185,8 +190,10 @@ public final class QTClusterer implements Clusterer {
         instanceCount = numberOfInstances;
         parallelTeam = team;
         clusters = new IntArrayList[numberOfInstances];
+        candidateClusters = new IntArrayList[numberOfInstances];
         for (int i = 0; i < numberOfInstances; i++) {
             clusters[i] = new IntArrayList();                        // NOPMD
+            candidateClusters[i] = new IntArrayList();               // NOPMD
         }
     }
 
@@ -228,12 +235,6 @@ public final class QTClusterer implements Clusterer {
         // eliminate any instances that will never cluster with anything else
         final IntList singletonClusters = identifySingletonClusters(calculator,
                 qualityThreshold, instanceList, clusterProgressLogger);
-
-         // A "temporary" cluster list used to find the maximum cardinality.
-        final IntArrayList[] candidateClusters = new IntArrayList[instanceList.size()];
-        for (int i = 0; i < instanceList.size(); i++) {
-            candidateClusters[i] = new IntArrayList();               // NOPMD
-        }
 
         final ProgressLogger innerLoopProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "inner loop iterations");
@@ -293,18 +294,18 @@ public final class QTClusterer implements Clusterer {
                                     while (!done && !notClustered.isEmpty()) {
                                         // find the node that has minimum distance between the
                                         // current cluster and the instances that have not yet
-                                        // been clustered
-                                        double minDistance = Double.MAX_VALUE;
+                                        // been clustered.
+                                        double minDistance = Double.POSITIVE_INFINITY;
                                         int minDistanceInstanceIndex = 0;
                                         int instanceIndex = 0;
                                         for (final int instance : notClustered) {
                                             final double newDistance =
                                                     calculator.distance(candidateCluster.elements(),
-                                                            candidateCluster.size(), instance);
+                                                            candidateCluster.size(), instance,
+                                                            minDistance);
 
                                             if (newDistance != calculator.getIgnoreDistance()
-                                                    && newDistance <= minDistance) {
-
+                                                    && newDistance < minDistance) {
                                                 minDistance = newDistance;
                                                 minDistanceInstanceIndex = instanceIndex;
                                             }

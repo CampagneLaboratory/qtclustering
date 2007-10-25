@@ -330,12 +330,12 @@ public final class TestQTClustererWithCaching {
                 + " that all men are created equal";
 
         final List<String[]> expectedResults = new ArrayList<String[]>();
-        expectedResults.add(new String[] {"and","are","men","all","the","and","new","our","ago"});
-        expectedResults.add(new String[] {"score","equal","forth","years","seven"});
-        expectedResults.add(new String[] {"fathers","created","liberty","brought"});
-        expectedResults.add(new String[] {"Four","that","this"});
-        expectedResults.add(new String[] {"on","to","in"});
-        expectedResults.add(new String[] {"continent","dedicated","conceived"});
+        expectedResults.add(new String[] {"and","ago","our","new","and","the","all","men","are"});
+        expectedResults.add(new String[] {"score","seven","years","forth","equal"});
+        expectedResults.add(new String[] {"fathers","brought","liberty","created"});
+        expectedResults.add(new String[] {"Four","this","that"});
+        expectedResults.add(new String[] {"on","in","to"});
+        expectedResults.add(new String[] {"continent","conceived","dedicated"});
         expectedResults.add(new String[] {"a"});
         expectedResults.add(new String[] {"nation"});
         expectedResults.add(new String[] {"proposition"});
