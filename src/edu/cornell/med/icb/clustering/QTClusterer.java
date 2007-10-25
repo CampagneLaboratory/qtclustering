@@ -22,6 +22,7 @@ import edu.rit.pj.IntegerForLoop;
 import edu.rit.pj.ParallelRegion;
 import edu.rit.pj.ParallelTeam;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.mg4j.util.ProgressLogger;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -123,11 +124,6 @@ public final class QTClusterer implements Clusterer {
     private final IntArrayList[] clusters;
 
     /**
-     * A "temporary" cluster list used to find the maximum cardinality.
-     */
-    private final IntArrayList[] candidateClusters;
-
-    /**
      * Indicates that progress on cluster being assembled.
      */
     private boolean logClusterProgress = true;
@@ -189,10 +185,8 @@ public final class QTClusterer implements Clusterer {
         instanceCount = numberOfInstances;
         parallelTeam = team;
         clusters = new IntArrayList[numberOfInstances];
-        candidateClusters = new IntArrayList[numberOfInstances];
         for (int i = 0; i < numberOfInstances; i++) {
             clusters[i] = new IntArrayList();                        // NOPMD
-            candidateClusters[i] = new IntArrayList();               // NOPMD
         }
     }
 
@@ -231,44 +225,15 @@ public final class QTClusterer implements Clusterer {
         // tell the distance calculator how many instances we're dealing with
         calculator.initialize(instanceCount);
 
-        LOGGER.info("Searching for instances that will form singleton clusters");
         // eliminate any instances that will never cluster with anything else
-        final IntArrayList singletonClusters = new IntArrayList();
-        for (int i = 0; i < instanceCount; i++) {
-            boolean singleton = true;
-            for (final int j : instanceList) {
-                if (i != j) {
-                    final double distance = calculator.distance(i, j);
-                    if (distance <= qualityThreshold) {
-                        // the instance i is likely to be clustered with some j
-                        singleton = false;
-                        break;
-                    }
-                }
-            }
+        final IntList singletonClusters = identifySingletonClusters(calculator,
+                qualityThreshold, instanceList, clusterProgressLogger);
 
-            // instance i is too far from anything else to ever cluster so it's a singleton cluster
-            if (singleton) {
-                if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("adding singleton instance " + i + " to cluster " + clusterCount);
-                }
-
-                // i is a singleton cluster
-                singletonClusters.add(i);
-
-                // and we can remove it from further consideration later
-                // note: we have to remove the "element i" and not the "element at i"
-                instanceList.remove(Integer.valueOf(i));
-
-                if (logClusterProgress) {
-                    clusterProgressLogger.update();
-                }
-            }
+         // A "temporary" cluster list used to find the maximum cardinality.
+        final IntArrayList[] candidateClusters = new IntArrayList[instanceList.size()];
+        for (int i = 0; i < instanceList.size(); i++) {
+            candidateClusters[i] = new IntArrayList();               // NOPMD
         }
-
-        LOGGER.info(singletonClusters.size() + " singleton instances found");
-        // save the singletons for last since we ideally want to return clusters in size order
-        singletonClusters.trim();
 
         final ProgressLogger innerLoopProgressLogger =
                 new ProgressLogger(LOGGER, logInterval, "inner loop iterations");
@@ -282,7 +247,7 @@ public final class QTClusterer implements Clusterer {
             // loop over instances until they have all been added to a cluster
             while (!instanceList.isEmpty()) {
                 // cluster remaining instances to find the maximum cardinality
-                for (int i = 0; i < instanceCount; i++) {
+                for (int i = 0; i < instanceList.size(); i++) {
                     candidateClusters[i].clear();
                 }
 
@@ -380,7 +345,7 @@ public final class QTClusterer implements Clusterer {
                 // identify cluster (set C) with maximum cardinality
                 int maxCardinality = 0;
                 int selectedClusterIndex = -1;
-                for (int i = 0; i < instanceCount; i++) {
+                for (int i = 0; i < instanceList.size(); i++) {
                     final int size = candidateClusters[i].size();
                     if (LOGGER.isTraceEnabled() && size > 0) {
                         LOGGER.trace("potential cluster " + i + ": "
@@ -438,6 +403,60 @@ public final class QTClusterer implements Clusterer {
 
         clusterProgressLogger.stop("Clustering completed.");
         return getClusters();
+    }
+
+    /**
+     * Eliminate any instances that will never cluster with anything else.
+     * @param calculator The distance calculator to use.
+     * @param qualityThreshold The threshold that determines whether or not an instance will cluster
+     * @param instanceList The list of instance to check
+     * @param clusterProgressLogger Where to log progress
+     * @return A non-null but possibly empty list of clusters that each contain a single instance
+     */
+    private IntList identifySingletonClusters(final SimilarityDistanceCalculator calculator,
+                                              final double qualityThreshold,
+                                              final LinkedList<Integer> instanceList,
+                                              final ProgressLogger clusterProgressLogger) {
+        LOGGER.info("Searching for instances that will form singleton clusters");
+        final IntArrayList singletonClusters = new IntArrayList();
+
+        for (int i = 0; i < instanceCount; i++) {
+            boolean singleton = true;
+            for (final int j : instanceList) {
+                if (i != j) {
+                    final double distance = calculator.distance(i, j);
+                    if (distance <= qualityThreshold) {
+                        // the instance i is likely to be clustered with some j
+                        singleton = false;
+                        break;
+                    }
+                }
+            }
+
+            // instance i is too far from anything else to ever cluster so it's a singleton cluster
+            if (singleton) {
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("adding singleton instance " + i + " to cluster " + clusterCount);
+                }
+
+                // i is a singleton cluster
+                singletonClusters.add(i);
+
+                // and we can remove it from further consideration later
+                // note: we have to remove the "element i" and not the "element at i"
+                instanceList.remove(Integer.valueOf(i));
+
+                if (logClusterProgress) {
+                    clusterProgressLogger.update();
+                }
+            }
+        }
+
+        LOGGER.info(singletonClusters.size() + " singleton instances found");
+        // save the singletons for last since we ideally want to return clusters in size order
+        singletonClusters.trim();
+
+        return singletonClusters;
     }
 
     /**
