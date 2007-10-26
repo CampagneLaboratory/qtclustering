@@ -102,6 +102,13 @@ public final class QTClusterer implements Clusterer {
     private static final Logger LOGGER = Logger.getLogger(QTClusterer.class);
 
     /**
+     * Representation of the specified floating-point value according to the
+     * IEEE 754 floating-point "double format" bit layout.
+     */
+    private static final long negativeZeroDoubleBits =
+            Double.doubleToLongBits(-0.0d);
+
+    /**
      * The time interval for a new log in milliseconds.
      *
      * @see it.unimi.dsi.mg4j.util.ProgressLogger#DEFAULT_LOG_INTERVAL
@@ -229,8 +236,7 @@ public final class QTClusterer implements Clusterer {
             instanceList.add(i);
         }
 
-        // tell the distance calculator how many instances we're dealing with
-        calculator.initialize(instanceCount);
+        final double ignoreDistance = calculator.getIgnoreDistance();
 
         // eliminate any instances that will never cluster with anything else
         final IntList singletonClusters = identifySingletonClusters(calculator,
@@ -299,12 +305,34 @@ public final class QTClusterer implements Clusterer {
                                         int minDistanceInstanceIndex = 0;
                                         int instanceIndex = 0;
                                         for (final int instance : notClustered) {
-                                            final double newDistance =
-                                                    calculator.distance(candidateCluster.elements(),
-                                                            candidateCluster.size(), instance,
-                                                            minDistance);
+                                            double newDistance = ignoreDistance;
 
-                                            if (newDistance != calculator.getIgnoreDistance()
+                                            final int[] cluster = candidateCluster.elements();
+                                            for (int instanceInCluster = 0; instanceInCluster < candidateCluster.size(); instanceInCluster++) {
+                                                final double a = calculator.distance(cluster[instanceInCluster], instance);
+                                                // if the distance of the instance will force the candidate cluster
+                                                // to be larger than the cutoff value, we can stop here
+                                                // because we know that this candidate cluster will be too large
+                                                if (a >= minDistance) {
+                                                    newDistance = ignoreDistance;
+                                                    break;
+                                                }
+                                                final double b = newDistance;
+
+                                                // This code is inlined from java.lang.Math.max(a, b)
+                                                if (a != a) {             // a is NaN
+                                                    newDistance = a;
+                                                } else if (a == 0.0d && b == 0.0d
+                                                        && Double.doubleToLongBits(a) == negativeZeroDoubleBits) {
+                                                    newDistance = b;
+                                                } else if (a >= b) {
+                                                    newDistance = a;
+                                                } else {
+                                                    newDistance = b;
+                                                }
+                                            }
+
+                                            if (newDistance != ignoreDistance
                                                     && newDistance < minDistance) {
                                                 minDistance = newDistance;
                                                 minDistanceInstanceIndex = instanceIndex;
