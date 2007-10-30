@@ -84,6 +84,8 @@
             <link href="http://commons.apache.org/lang/api-release/"/>
             <link href="http://logging.apache.org/log4j/1.2/apidocs/"/>
             <link href="http://www.cs.rit.edu/~ark/pj/doc/"/>
+            <link href="http://commons.apache.org/io/"/>
+            <link href="http://icbtools.med.cornell.edu/javadocs/icb-utils/"/>
             <classpath>
                 <path refid="compile.classpath"/>
                 <pathelement location="${classes}"/>

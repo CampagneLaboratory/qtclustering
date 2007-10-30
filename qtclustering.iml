@@ -2,7 +2,6 @@
 <module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/classes" />
-    <exclude-output />
     <output-test url="file://$MODULE_DIR$/test-classes" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
@@ -80,6 +79,30 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/../../../../../../java/pjsrc20071021.jar!/pj/lib" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/commons-io-1.3.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../../../java/commons-io-1.3.2-src.zip!/commons-io-1.3.2-src/src/java" />
+          <root url="jar://$MODULE_DIR$/../../../../../../java/commons-io-1.3.2-src.zip!/commons-io-1.3.2-src/src/test" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/icb-utils.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../icb-utils/src" />
+          <root url="file://$MODULE_DIR$/../icb-utils/test-src" />
         </SOURCES>
       </library>
     </orderEntry>

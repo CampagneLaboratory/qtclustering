@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Basic tests of the {@link edu.cornell.med.icb.clustering.QTClusterer
+ * Basic tests of the {@link edu.cornell.med.icb.clustering.QTClusterer}.
  */
 public final class TestQTClusterer {
     /**
@@ -312,6 +312,9 @@ public final class TestQTClusterer {
             LOGGER.debug("Iterative clusters - threshold = " + i);
             final List<int[]> expectedCluster = expectedResults[i];
 
+            assertEquals("Number of clusters don't match at threshold = " + i,
+                    expectedCluster.size(), clusters.size());
+
             int j = 0;
             for (final int[] cluster : clusters) {
                 // convert instance indexes from the cluster to data
@@ -364,6 +367,8 @@ public final class TestQTClusterer {
         final Clusterer clusterer = new QTClusterer(words.length);
         final List<int[]> clusters = clusterer.cluster(distanceCalculator, 0);
 
+        assertEquals("Number of clusters don't match", expectedResults.size(), clusters.size());
+
         int j = 0;
         for (final int[] cluster : clusters) {
             // convert instance indexes from the cluster to source data
@@ -378,7 +383,6 @@ public final class TestQTClusterer {
             j++;
         }
     }
-
 
     private interface Person {
     }
