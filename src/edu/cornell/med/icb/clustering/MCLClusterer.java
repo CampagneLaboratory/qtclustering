@@ -60,16 +60,16 @@ public final class MCLClusterer implements Clusterer {
     private final IntArrayList[] clusters;
 
     /**
-     * Name of mcl executable.  This should be a fully qualified path unless it
-     * is located on the execution path.
-     */
-    private String mclCommand;
-
-    /**
      * Default executable name for mcl.  The default assumes that the command is already
      * on the path.
      */
-    private static final String DEFAULT_MCL_COMMAND = "mcl";
+    private static final String DEFAULT_MCL_COMMAND = System.getProperty("MCL_COMMAND", "mcl");
+
+    /**
+     * Name of mcl executable.  This should be a fully qualified path unless it
+     * is located on the execution path.
+     */
+    private String mclCommand = DEFAULT_MCL_COMMAND;
 
     /**
      * Construct a new quality threshold clusterer.
@@ -162,6 +162,10 @@ public final class MCLClusterer implements Clusterer {
      */
     public List<int[]> cluster(final SimilarityDistanceCalculator calculator,
                                final double qualityThreshold) {
+        if (mclCommand == null) {
+            throw new IllegalStateException("mcl command not set!");
+        }
+
         // reset cluster results
         clusterCount = 0;
         for (int i = 0; i < instanceCount; i++) {

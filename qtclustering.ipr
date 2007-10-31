@@ -494,6 +494,44 @@
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
+  <component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="TestMCLClusterer" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
+      <pattern value="edu.cornell.med.icb.clustering.*" />
+      <module name="qtclustering" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="PACKAGE_NAME" value="edu.cornell.med.icb.clustering" />
+      <option name="MAIN_CLASS_NAME" value="edu.cornell.med.icb.clustering.TestMCLClusterer" />
+      <option name="METHOD_NAME" value="multipleThresholds" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-DMCL_COMMAND=&quot;c:\cygwin\usr\local\bin\mcl&quot; -Dlog4j.debug=&quot;true&quot; -Dlog4j.configuration=&quot;file:///C:\Documents and Settings\Marko\My Documents\IdeaProjects\icb-commons\qtclustering\config\log4j.properties&quot;" />
+      <option name="PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="ADDITIONAL_CLASS_PATH" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="wholeProject" />
+      </option>
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="1056" />
+        <option name="TRANSPORT" value="0" />
+        <option name="LOCAL" value="true" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="JProfiler">
+        <option name="WINDOW" value="false" />
+        <option name="JVMPI" value="false" />
+        <option name="INTERPRETED" value="false" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Debug" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Run Ant target" value="true" />
+        <option name="Make" value="false" />
+      </method>
+    </configuration>
+  </component>
   <component name="ResourceManagerContainer">
     <option name="myResourceBundles">
       <value>

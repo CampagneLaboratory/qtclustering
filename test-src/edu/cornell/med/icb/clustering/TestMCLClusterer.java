@@ -49,6 +49,8 @@ public class TestMCLClusterer {
 
     /**
      * Validate that reading from an MCL output file produces the proper number of clusters.
+     * @throws IOException if the {@link edu.cornell.med.icb.clustering.MCLClusterer}
+     * cannot access the reader passed to it.
      */
     @Test
     public void testMCLOutputFile() throws IOException {
@@ -75,13 +77,20 @@ public class TestMCLClusterer {
 
     /**
      * Validate that reading from an empty MCL output file does not cause errors.
+     * @throws IOException if the {@link edu.cornell.med.icb.clustering.MCLClusterer}
+     * cannot access the reader passed to it.
      */
     @Test
     public void testEmptyMCLOutputFile() throws IOException {
-        final Reader reader = new NullReader(0);
-        final Clusterer clusterer = new MCLClusterer(reader);
-        final List<int[]> clusters = clusterer.getClusters();
-        assertEquals("there should be 0 clusters", 0, clusters.size());
+        Reader reader = null;
+        try {
+            reader = new NullReader(0);
+            final Clusterer clusterer = new MCLClusterer(reader);
+            final List<int[]> clusters = clusterer.getClusters();
+            assertEquals("there should be 0 clusters", 0, clusters.size());
+        } finally {
+            IOUtils.closeQuietly(reader);
+        }
     }
 
     /**
@@ -93,7 +102,7 @@ public class TestMCLClusterer {
      * This test validates that each instance will be placed into it's own
      * cluster when there is no overlap between them.
      */
-    // TODO @Test
+    @Test
     public void oneInstancePerCluster() {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new MCLClusterer(2);
@@ -125,7 +134,7 @@ public class TestMCLClusterer {
 
     }
 
-    // TODO @Test
+    @Test
     public void fourInstanceClusteringInOneCluster() {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new MCLClusterer(4);
@@ -161,7 +170,7 @@ public class TestMCLClusterer {
         assertTrue("Instance 3 in cluster 0", ArrayUtils.contains(cluster, 3));
     }
 
-    // TODO @Test
+    @Test
     public void fourInstanceClusteringInThreeClusters() {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new MCLClusterer(4);
@@ -197,7 +206,7 @@ public class TestMCLClusterer {
         assertEquals("Instance 3 in cluster 2", 3, clusters.get(2)[0]);
     }
 
-    // TODO @Test
+    @Test
     public void fourInstanceClusteringInFourClusters() {
         // put one instance in each cluster, total two instances
         final Clusterer clusterer = new MCLClusterer(4);
@@ -229,7 +238,7 @@ public class TestMCLClusterer {
         assertEquals("Instance 3 in cluster 3", 3, clusters.get(2)[0]);
     }
 
-    // TODO @Test
+    @Test
     public void zeroDistanceCalculator() {
         final Clusterer clusterer = new MCLClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
@@ -255,7 +264,7 @@ public class TestMCLClusterer {
      * This test validates that the clusterer will not throw any errors when
      * passed zero instances.
      */
-    // TODO @Test
+    @Test
     public void zeroInstances() {
         final Clusterer clusterer = new MCLClusterer(0);
         final SimilarityDistanceCalculator distanceCalculator =
@@ -285,7 +294,7 @@ public class TestMCLClusterer {
      * This test validates that a dataset is clustered correctly using various
      * different values of thresholds.
      */
-    // TODO @Test
+    @Test
     public void multipleThresholds() {
         // raw data to test
         final int[] data = {
@@ -359,7 +368,7 @@ public class TestMCLClusterer {
     /**
      * A test that uses a clusters words of equal length together.
      */
-    // TODO @Test
+    @Test
     public void clusterWordsInAString() {
         final String text = "Four score and seven years ago our fathers brought forth on this"
                 + " continent a new nation conceived in liberty and dedicated to the proposition"
@@ -419,7 +428,7 @@ public class TestMCLClusterer {
     /**
      * Tests clustering with lists of object types.
      */
-    // TODO @Test
+    @Test
     public void clusterObjectCollections() {
         final List<Object> peoplePlacesAndThings = new ArrayList<Object>();
         final Person tom = new Person() { };

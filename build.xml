@@ -25,6 +25,8 @@
     <property name="ant.build.javac.source" value="1.5"/>
     <property name="ant.build.javac.target" value="1.5"/>
 
+    <property name="test.MCL_COMMAND" location="c:\cygwin\usr\local\bin\mcl.exe"/>
+
     <path id="compile.classpath">
         <fileset dir="${lib}">
             <include name="*.jar"/>
