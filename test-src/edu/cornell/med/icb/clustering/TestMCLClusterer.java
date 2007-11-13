@@ -108,7 +108,6 @@ public class TestMCLClusterer {
         final Clusterer clusterer = new MCLClusterer(2);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int instanceIndex,
                                            final int otherInstanceIndex) {
                         if (instanceIndex != otherInstanceIndex) {
@@ -140,7 +139,6 @@ public class TestMCLClusterer {
         final Clusterer clusterer = new MCLClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int i, final int j) {
                         // instances 0 and 1 belong to same cluster
                         if (i == 0 && j == 1 || i == 1 && j == 0) {
@@ -176,7 +174,6 @@ public class TestMCLClusterer {
         final Clusterer clusterer = new MCLClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int i, final int j) {
                         // instances 0 and 1 belong to same cluster
                         if (i == 0 && j == 1 || i == 1 && j == 0) {
@@ -212,7 +209,6 @@ public class TestMCLClusterer {
         final Clusterer clusterer = new MCLClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int i, final int j) {
                         // instances 0 and 1 belong to same cluster
                         if (i == 0 && j == 1 || i == 1 && j == 0) {
@@ -243,7 +239,6 @@ public class TestMCLClusterer {
         final Clusterer clusterer = new MCLClusterer(4);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int i, final int j) {
                         return 0;   // instances 0-3 belong to the same cluster
                     }
@@ -269,7 +264,6 @@ public class TestMCLClusterer {
         final Clusterer clusterer = new MCLClusterer(0);
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int instanceIndex,
                                            final int otherInstanceIndex) {
                         return Math.abs(instanceIndex - otherInstanceIndex);
@@ -332,7 +326,6 @@ public class TestMCLClusterer {
         // Distance function that returns the difference between instances
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int i, final int j) {
                         return Math.abs(data[i] - data[j]);
                     }
@@ -391,7 +384,6 @@ public class TestMCLClusterer {
         // create a distance calculator that returns the difference in size between the two words
         final SimilarityDistanceCalculator distanceCalculator =
                 new MaxLinkageDistanceCalculator() {
-                    @Override
                     public double distance(final int i, final int j) {
                         return Math.abs(words[i].length() - words[j].length());
                     }
