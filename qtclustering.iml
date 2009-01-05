@@ -21,7 +21,7 @@
           <root url="jar://$MODULE_DIR$/lib/fastutil-5.0.9.jar!/" />
         </CLASSES>
         <JAVADOC>
-          <root url="http://fastutil.dsi.unimi.it/docs/" />
+          <root url="http://fastutil.dsi.unimi.it/docs" />
         </JAVADOC>
         <SOURCES>
           <root url="file://$MODULE_DIR$/../../../../../../java/fastutil-5.0.9/java" />
@@ -106,7 +106,11 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntryProperties />
+  </component>
+  <component name="copyright">
+    <Base>
+      <setting name="state" value="2" />
+    </Base>
   </component>
 </module>
 
